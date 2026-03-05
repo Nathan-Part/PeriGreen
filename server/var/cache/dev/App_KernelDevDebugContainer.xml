@@ -26,6 +26,8 @@
       <parameter key="MonologBundle">Symfony\Bundle\MonologBundle\MonologBundle</parameter>
       <parameter key="MakerBundle">Symfony\Bundle\MakerBundle\MakerBundle</parameter>
       <parameter key="DoctrineFixturesBundle">Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle</parameter>
+      <parameter key="LexikJWTAuthenticationBundle">Lexik\Bundle\JWTAuthenticationBundle\LexikJWTAuthenticationBundle</parameter>
+      <parameter key="NelmioCorsBundle">Nelmio\CorsBundle\NelmioCorsBundle</parameter>
     </parameter>
     <parameter key="kernel.bundles_metadata" type="collection">
       <parameter key="FrameworkBundle" type="collection">
@@ -80,6 +82,14 @@
         <parameter key="path">C:\Users\natou\Desktop\PeriGreen\server\vendor\doctrine\doctrine-fixtures-bundle</parameter>
         <parameter key="namespace">Doctrine\Bundle\FixturesBundle</parameter>
       </parameter>
+      <parameter key="LexikJWTAuthenticationBundle" type="collection">
+        <parameter key="path">C:\Users\natou\Desktop\PeriGreen\server\vendor\lexik\jwt-authentication-bundle</parameter>
+        <parameter key="namespace">Lexik\Bundle\JWTAuthenticationBundle</parameter>
+      </parameter>
+      <parameter key="NelmioCorsBundle" type="collection">
+        <parameter key="path">C:\Users\natou\Desktop\PeriGreen\server\vendor\nelmio\cors-bundle</parameter>
+        <parameter key="namespace">Nelmio\CorsBundle</parameter>
+      </parameter>
     </parameter>
     <parameter key="kernel.charset">UTF-8</parameter>
     <parameter key="kernel.container_class">App_KernelDevDebugContainer</parameter>
@@ -131,6 +141,12 @@
       <parameter key="Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle" type="collection">
         <parameter key="dev">true</parameter>
         <parameter key="test">true</parameter>
+      </parameter>
+      <parameter key="Lexik\Bundle\JWTAuthenticationBundle\LexikJWTAuthenticationBundle" type="collection">
+        <parameter key="all">true</parameter>
+      </parameter>
+      <parameter key="Nelmio\CorsBundle\NelmioCorsBundle" type="collection">
+        <parameter key="all">true</parameter>
       </parameter>
     </parameter>
     <parameter key="event_dispatcher.event_aliases" type="collection">
@@ -260,6 +276,45 @@
         </parameter>
       </parameter>
     </parameter>
+    <parameter key="lexik_jwt_authentication.pass_phrase">%env(JWT_PASSPHRASE)%</parameter>
+    <parameter key="lexik_jwt_authentication.token_ttl">3600</parameter>
+    <parameter key="lexik_jwt_authentication.clock_skew">0</parameter>
+    <parameter key="lexik_jwt_authentication.allow_no_expiration">false</parameter>
+    <parameter key="lexik_jwt_authentication.user_id_claim">username</parameter>
+    <parameter key="lexik_jwt_authentication.encoder.signature_algorithm">RS256</parameter>
+    <parameter key="nelmio_cors.map" type="collection">
+      <parameter key="^/" type="collection"/>
+    </parameter>
+    <parameter key="nelmio_cors.defaults" type="collection">
+      <parameter key="allow_origin" type="collection">
+        <parameter>%env(CORS_ALLOW_ORIGIN)%</parameter>
+      </parameter>
+      <parameter key="allow_credentials">false</parameter>
+      <parameter key="allow_headers" type="collection">
+        <parameter>content-type</parameter>
+        <parameter>authorization</parameter>
+      </parameter>
+      <parameter key="allow_private_network">false</parameter>
+      <parameter key="expose_headers" type="collection">
+        <parameter>Link</parameter>
+      </parameter>
+      <parameter key="allow_methods" type="collection">
+        <parameter>GET</parameter>
+        <parameter>OPTIONS</parameter>
+        <parameter>POST</parameter>
+        <parameter>PUT</parameter>
+        <parameter>PATCH</parameter>
+        <parameter>DELETE</parameter>
+      </parameter>
+      <parameter key="max_age">3600</parameter>
+      <parameter key="hosts" type="collection"/>
+      <parameter key="origin_regex">true</parameter>
+      <parameter key="skip_same_as_origin">true</parameter>
+      <parameter key="forced_allow_origin_value">null</parameter>
+    </parameter>
+    <parameter key="nelmio_cors.cors_listener.class">Nelmio\CorsBundle\EventListener\CorsListener</parameter>
+    <parameter key="nelmio_cors.options_resolver.class">Nelmio\CorsBundle\Options\Resolver</parameter>
+    <parameter key="nelmio_cors.options_provider.config.class">Nelmio\CorsBundle\Options\ConfigProvider</parameter>
     <parameter key="data_collector.templates" type="collection">
       <parameter key="data_collector.request" type="collection">
         <parameter>request</parameter>
@@ -362,7 +417,50 @@
       <tag name="controller.service_arguments"/>
       <tag name="routing.route_loader"/>
     </service>
+    <service id="App\Controller\AuthController" class="App\Controller\AuthController" public="true" autowire="true" autoconfigure="true">
+      <tag name="controller.service_arguments"/>
+      <tag name="routing.controller"/>
+      <tag name="container.service_subscriber"/>
+      <call method="setContainer">
+        <argument type="service" id=".service_locator.TJNRSaV.App\Controller\AuthController"/>
+      </call>
+    </service>
+    <service id="App\Controller\CategoryController" class="App\Controller\CategoryController" public="true" autowire="true" autoconfigure="true">
+      <tag name="controller.service_arguments"/>
+      <tag name="routing.controller"/>
+      <tag name="container.service_subscriber"/>
+      <call method="setContainer">
+        <argument type="service" id=".service_locator.TJNRSaV.App\Controller\CategoryController"/>
+      </call>
+    </service>
+    <service id="App\Controller\EquipmentController" class="App\Controller\EquipmentController" public="true" autowire="true" autoconfigure="true">
+      <tag name="controller.service_arguments"/>
+      <tag name="routing.controller"/>
+      <tag name="container.service_subscriber"/>
+      <call method="setContainer">
+        <argument type="service" id=".service_locator.TJNRSaV.App\Controller\EquipmentController"/>
+      </call>
+    </service>
+    <service id="App\Controller\LoanController" class="App\Controller\LoanController" public="true" autowire="true" autoconfigure="true">
+      <tag name="controller.service_arguments"/>
+      <tag name="routing.controller"/>
+      <tag name="container.service_subscriber"/>
+      <call method="setContainer">
+        <argument type="service" id=".service_locator.TJNRSaV.App\Controller\LoanController"/>
+      </call>
+    </service>
+    <service id="App\Controller\ReservationController" class="App\Controller\ReservationController" public="true" autowire="true" autoconfigure="true">
+      <tag name="controller.service_arguments"/>
+      <tag name="routing.controller"/>
+      <tag name="container.service_subscriber"/>
+      <call method="setContainer">
+        <argument type="service" id=".service_locator.TJNRSaV.App\Controller\ReservationController"/>
+      </call>
+    </service>
     <service id="App\DataFixtures\AppFixtures" class="App\DataFixtures\AppFixtures" autowire="true" autoconfigure="true">
+      <tag name="doctrine.fixture.orm"/>
+    </service>
+    <service id="App\DataFixtures\CategoryFixtures" class="App\DataFixtures\CategoryFixtures" autowire="true" autoconfigure="true">
       <tag name="doctrine.fixture.orm"/>
     </service>
     <service id="App\Entity\Category" class="App\Entity\Category" autowire="true" autoconfigure="true">
@@ -2526,6 +2624,8 @@
           <argument>C:\Users\natou\Desktop\PeriGreen\server\vendor\symfony\monolog-bundle\src/translations</argument>
           <argument>C:\Users\natou\Desktop\PeriGreen\server\vendor\symfony\maker-bundle/translations</argument>
           <argument>C:\Users\natou\Desktop\PeriGreen\server\vendor\doctrine\doctrine-fixtures-bundle/translations</argument>
+          <argument>C:\Users\natou\Desktop\PeriGreen\server\vendor\lexik\jwt-authentication-bundle/translations</argument>
+          <argument>C:\Users\natou\Desktop\PeriGreen\server\vendor\nelmio\cors-bundle/translations</argument>
         </argument>
         <argument key="cache_vary" type="collection">
           <argument key="scanned_directories" type="collection">
@@ -2546,6 +2646,8 @@
             <argument>C:\Users\natou\Desktop\PeriGreen\server\vendor\symfony\monolog-bundle\src/translations</argument>
             <argument>C:\Users\natou\Desktop\PeriGreen\server\vendor\symfony\maker-bundle/translations</argument>
             <argument>C:\Users\natou\Desktop\PeriGreen\server\vendor\doctrine\doctrine-fixtures-bundle/translations</argument>
+            <argument>C:\Users\natou\Desktop\PeriGreen\server\vendor\lexik\jwt-authentication-bundle/translations</argument>
+            <argument>C:\Users\natou\Desktop\PeriGreen\server\vendor\nelmio\cors-bundle/translations</argument>
           </argument>
         </argument>
       </argument>
@@ -2949,6 +3051,30 @@
           <argument>onKernelResponse</argument>
         </argument>
         <argument>0</argument>
+      </call>
+      <call method="addListener">
+        <argument>kernel.request</argument>
+        <argument type="collection">
+          <argument type="service_closure" id="nelmio_cors.cors_listener"/>
+          <argument>onKernelRequest</argument>
+        </argument>
+        <argument>250</argument>
+      </call>
+      <call method="addListener">
+        <argument>kernel.response</argument>
+        <argument type="collection">
+          <argument type="service_closure" id="nelmio_cors.cors_listener"/>
+          <argument>onKernelResponse</argument>
+        </argument>
+        <argument>0</argument>
+      </call>
+      <call method="addListener">
+        <argument>kernel.response</argument>
+        <argument type="collection">
+          <argument type="service_closure" id="nelmio_cors.cacheable_response_vary_listener"/>
+          <argument>onResponse</argument>
+        </argument>
+        <argument>-15</argument>
       </call>
       <call method="addListener">
         <argument>kernel.controller_arguments</argument>
@@ -3621,7 +3747,13 @@
     </service>
     <service id="routing.loader.attribute.services" class="Symfony\Component\Routing\Loader\AttributeServicesLoader">
       <tag name="routing.loader" priority="-10"/>
-      <argument type="collection"/>
+      <argument type="collection">
+        <argument>App\Controller\AuthController</argument>
+        <argument>App\Controller\CategoryController</argument>
+        <argument>App\Controller\EquipmentController</argument>
+        <argument>App\Controller\LoanController</argument>
+        <argument>App\Controller\ReservationController</argument>
+      </argument>
     </service>
     <service id="routing.loader.attribute.directory" class="Symfony\Component\Routing\Loader\AttributeDirectoryLoader">
       <tag name="routing.loader" priority="-10"/>
@@ -7668,14 +7800,198 @@
             <argument key="fixture" type="service" id="App\DataFixtures\AppFixtures"/>
             <argument key="groups" type="collection"/>
           </argument>
+          <argument type="collection">
+            <argument key="fixture" type="service" id="App\DataFixtures\CategoryFixtures"/>
+            <argument key="groups" type="collection"/>
+          </argument>
         </argument>
       </call>
     </service>
     <service id="doctrine.fixtures.purger.orm_purger_factory" class="Doctrine\Bundle\FixturesBundle\Purger\ORMPurgerFactory">
       <tag name="doctrine.fixtures.purger_factory" alias="default"/>
     </service>
+    <service id="lexik_jwt_authentication.jwt_manager" class="Lexik\Bundle\JWTAuthenticationBundle\Services\JWTManager" public="true">
+      <argument type="service" id="lexik_jwt_authentication.encoder.lcobucci"/>
+      <argument type="service" id="debug.event_dispatcher"/>
+      <argument>username</argument>
+      <argument type="service" id="lexik_jwt_authentication.payload_enrichment"/>
+    </service>
+    <service id="lexik_jwt_authentication.payload_enrichment.random_jti_enrichment" class="Lexik\Bundle\JWTAuthenticationBundle\Services\PayloadEnrichment\RandomJtiEnrichment"/>
+    <service id="lexik_jwt_authentication.payload_enrichment" class="Lexik\Bundle\JWTAuthenticationBundle\Services\PayloadEnrichment\ChainEnrichment">
+      <argument type="collection"/>
+    </service>
+    <service id="lexik_jwt_authentication.key_loader.abstract" abstract="true">
+      <argument/>
+      <argument/>
+      <argument>%env(JWT_PASSPHRASE)%</argument>
+      <argument type="collection"/>
+    </service>
+    <service id="lexik_jwt_authentication.key_loader.raw" class="Lexik\Bundle\JWTAuthenticationBundle\Services\KeyLoader\RawKeyLoader">
+      <argument>%env(resolve:JWT_SECRET_KEY)%</argument>
+      <argument>%env(resolve:JWT_PUBLIC_KEY)%</argument>
+      <argument>%env(JWT_PASSPHRASE)%</argument>
+      <argument type="collection"/>
+    </service>
+    <service id="lexik_jwt_authentication.encoder.lcobucci" class="Lexik\Bundle\JWTAuthenticationBundle\Encoder\LcobucciJWTEncoder">
+      <argument type="service" id="lexik_jwt_authentication.jws_provider.lcobucci"/>
+    </service>
+    <service id="lexik_jwt_authentication.jws_provider.lcobucci" class="Lexik\Bundle\JWTAuthenticationBundle\Services\JWSProvider\LcobucciJWSProvider">
+      <argument type="service" id="lexik_jwt_authentication.key_loader.raw"/>
+      <argument>RS256</argument>
+      <argument>3600</argument>
+      <argument>0</argument>
+      <argument>false</argument>
+    </service>
+    <service id="lexik_jwt_authentication.handler.authentication_success" class="Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler">
+      <tag name="monolog.logger" channel="security"/>
+      <argument type="service" id="lexik_jwt_authentication.jwt_manager"/>
+      <argument type="service" id="debug.event_dispatcher"/>
+      <argument type="collection"/>
+      <argument>true</argument>
+    </service>
+    <service id="lexik_jwt_authentication.handler.authentication_failure" class="Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationFailureHandler">
+      <tag name="monolog.logger" channel="security"/>
+      <argument type="service" id="debug.event_dispatcher"/>
+      <argument type="service" id="translator.data_collector" on-invalid="null"/>
+    </service>
+    <service id="lexik_jwt_authentication.security.jwt_authenticator" class="Lexik\Bundle\JWTAuthenticationBundle\Security\Authenticator\JWTAuthenticator" abstract="true">
+      <argument type="service" id="lexik_jwt_authentication.jwt_manager"/>
+      <argument type="service" id="debug.event_dispatcher"/>
+      <argument type="service" id="lexik_jwt_authentication.extractor.chain_extractor"/>
+      <argument/>
+      <argument type="service" id="translator.data_collector" on-invalid="null"/>
+    </service>
+    <service id="lexik_jwt_authentication.extractor.chain_extractor" class="Lexik\Bundle\JWTAuthenticationBundle\TokenExtractor\ChainTokenExtractor">
+      <argument type="collection">
+        <argument type="service" id="lexik_jwt_authentication.extractor.authorization_header_extractor"/>
+      </argument>
+    </service>
+    <service id="lexik_jwt_authentication.extractor.authorization_header_extractor" class="Lexik\Bundle\JWTAuthenticationBundle\TokenExtractor\AuthorizationHeaderTokenExtractor">
+      <argument>Bearer</argument>
+      <argument>Authorization</argument>
+    </service>
+    <service id="lexik_jwt_authentication.extractor.query_parameter_extractor" class="Lexik\Bundle\JWTAuthenticationBundle\TokenExtractor\QueryParameterTokenExtractor">
+      <argument/>
+    </service>
+    <service id="lexik_jwt_authentication.extractor.cookie_extractor" class="Lexik\Bundle\JWTAuthenticationBundle\TokenExtractor\CookieTokenExtractor">
+      <argument/>
+    </service>
+    <service id="lexik_jwt_authentication.extractor.split_cookie_extractor" class="Lexik\Bundle\JWTAuthenticationBundle\TokenExtractor\SplitCookieExtractor">
+      <argument type="collection"/>
+    </service>
+    <service id="lexik_jwt_authentication.security.jwt_user_provider" class="Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserProvider">
+      <argument/>
+    </service>
+    <service id="lexik_jwt_authentication.check_config_command" class="Lexik\Bundle\JWTAuthenticationBundle\Command\CheckConfigCommand">
+      <tag name="console.command" command="lexik:jwt:check-config"/>
+      <tag name="container.no_preload"/>
+      <argument type="service" id="lexik_jwt_authentication.key_loader.raw"/>
+      <argument>RS256</argument>
+      <call method="setName">
+        <argument>lexik:jwt:check-config</argument>
+      </call>
+      <call method="setDescription">
+        <argument>Checks that the bundle is properly configured.</argument>
+      </call>
+    </service>
+    <service id="lexik_jwt_authentication.migrate_config_command" class="Lexik\Bundle\JWTAuthenticationBundle\Command\MigrateConfigCommand">
+      <tag name="console.command" command="lexik:jwt:migrate-config"/>
+      <tag name="container.no_preload"/>
+      <argument type="service" id="lexik_jwt_authentication.key_loader.raw"/>
+      <argument>%env(JWT_PASSPHRASE)%</argument>
+      <argument>RS256</argument>
+      <call method="setName">
+        <argument>lexik:jwt:migrate-config</argument>
+      </call>
+      <call method="setDescription">
+        <argument>Migrate LexikJWTAuthenticationBundle configuration to the Web-Token one.</argument>
+      </call>
+    </service>
+    <service id="lexik_jwt_authentication.enable_encryption_config_command" class="Lexik\Bundle\JWTAuthenticationBundle\Command\EnableEncryptionConfigCommand">
+      <tag name="console.command" command="lexik:jwt:enable-encryption"/>
+      <tag name="container.no_preload"/>
+      <argument>null</argument>
+      <call method="setName">
+        <argument>lexik:jwt:enable-encryption</argument>
+      </call>
+      <call method="setDescription">
+        <argument>Enable Web-Token encryption support.</argument>
+      </call>
+    </service>
+    <service id="lexik_jwt_authentication.generate_token_command" class="Lexik\Bundle\JWTAuthenticationBundle\Command\GenerateTokenCommand" public="true">
+      <tag name="console.command" command="lexik:jwt:generate-token"/>
+      <tag name="container.no_preload"/>
+      <argument type="service" id="lexik_jwt_authentication.jwt_manager"/>
+      <argument type="iterator">
+        <argument type="service" id="security.user.provider.concrete.app_user_provider"/>
+      </argument>
+      <call method="setName">
+        <argument>lexik:jwt:generate-token</argument>
+      </call>
+      <call method="setDescription">
+        <argument>Generates a JWT token for a given user.</argument>
+      </call>
+    </service>
+    <service id="lexik_jwt_authentication.generate_keypair_command" class="Lexik\Bundle\JWTAuthenticationBundle\Command\GenerateKeyPairCommand">
+      <tag name="console.command" command="lexik:jwt:generate-keypair"/>
+      <tag name="container.no_preload"/>
+      <argument type="service" id="filesystem"/>
+      <argument>%env(resolve:JWT_SECRET_KEY)%</argument>
+      <argument>%env(resolve:JWT_PUBLIC_KEY)%</argument>
+      <argument>%env(JWT_PASSPHRASE)%</argument>
+      <argument>RS256</argument>
+      <call method="setName">
+        <argument>lexik:jwt:generate-keypair</argument>
+      </call>
+      <call method="setDescription">
+        <argument>Generate public/private keys for use in your application.</argument>
+      </call>
+    </service>
+    <service id="nelmio_cors.cors_listener" class="Nelmio\CorsBundle\EventListener\CorsListener">
+      <tag name="kernel.event_listener" event="kernel.request" method="onKernelRequest" priority="250"/>
+      <tag name="kernel.event_listener" event="kernel.response" method="onKernelResponse" priority="0"/>
+      <tag name="container.hot_path"/>
+      <tag name="container.hot_path"/>
+      <argument type="service" id="nelmio_cors.options_resolver"/>
+    </service>
+    <service id="nelmio_cors.options_resolver" class="Nelmio\CorsBundle\Options\Resolver">
+      <argument type="collection">
+        <argument type="service" id="nelmio_cors.options_provider.config"/>
+      </argument>
+    </service>
+    <service id="nelmio_cors.options_provider.config" class="Nelmio\CorsBundle\Options\ConfigProvider">
+      <tag name="nelmio_cors.options_provider" priority="-1"/>
+      <argument>%nelmio_cors.map%</argument>
+      <argument>%nelmio_cors.defaults%</argument>
+    </service>
+    <service id="nelmio_cors.cacheable_response_vary_listener" class="Nelmio\CorsBundle\EventListener\CacheableResponseVaryListener">
+      <tag name="kernel.event_listener" event="kernel.response" method="onResponse" priority="-15"/>
+      <tag name="container.hot_path"/>
+    </service>
+    <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\AuthController" class="App\Controller\AuthController" autowire="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\AuthController" class="App\Controller\AuthController" autowire="true" abstract="true"/>
+    <service id=".instanceof.App\Controller\AuthController.0.App\Controller\AuthController" class="App\Controller\AuthController" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Controller\AuthController" class="App\Controller\AuthController" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\CategoryController" class="App\Controller\CategoryController" autowire="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\CategoryController" class="App\Controller\CategoryController" autowire="true" abstract="true"/>
+    <service id=".instanceof.App\Controller\CategoryController.0.App\Controller\CategoryController" class="App\Controller\CategoryController" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Controller\CategoryController" class="App\Controller\CategoryController" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\EquipmentController" class="App\Controller\EquipmentController" autowire="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\EquipmentController" class="App\Controller\EquipmentController" autowire="true" abstract="true"/>
+    <service id=".instanceof.App\Controller\EquipmentController.0.App\Controller\EquipmentController" class="App\Controller\EquipmentController" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Controller\EquipmentController" class="App\Controller\EquipmentController" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\LoanController" class="App\Controller\LoanController" autowire="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\LoanController" class="App\Controller\LoanController" autowire="true" abstract="true"/>
+    <service id=".instanceof.App\Controller\LoanController.0.App\Controller\LoanController" class="App\Controller\LoanController" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Controller\LoanController" class="App\Controller\LoanController" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\ReservationController" class="App\Controller\ReservationController" autowire="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\ReservationController" class="App\Controller\ReservationController" autowire="true" abstract="true"/>
+    <service id=".instanceof.App\Controller\ReservationController.0.App\Controller\ReservationController" class="App\Controller\ReservationController" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Controller\ReservationController" class="App\Controller\ReservationController" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Doctrine\Bundle\FixturesBundle\ORMFixtureInterface.0.App\DataFixtures\AppFixtures" class="App\DataFixtures\AppFixtures" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\DataFixtures\AppFixtures" class="App\DataFixtures\AppFixtures" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Doctrine\Bundle\FixturesBundle\ORMFixtureInterface.0.App\DataFixtures\CategoryFixtures" class="App\DataFixtures\CategoryFixtures" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\DataFixtures\CategoryFixtures" class="App\DataFixtures\CategoryFixtures" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.App\Entity\Category.0.App\Entity\Category" class="App\Entity\Category" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\Entity\Category" class="App\Entity\Category" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.App\Entity\Equipment.0.App\Entity\Equipment" class="App\Entity\Equipment" autowire="true" abstract="true"/>
@@ -8843,6 +9159,36 @@
         <argument key="web_link.http_header_serializer" type="service_closure" id="web_link.http_header_serializer" on-invalid="ignore"/>
       </argument>
     </service>
+    <service id=".service_locator.TJNRSaV.App\Controller\AuthController" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator_context" id="App\Controller\AuthController"/>
+      <argument>App\Controller\AuthController</argument>
+      <argument type="service" id="service_container"/>
+      <factory service=".service_locator.TJNRSaV" method="withContext"/>
+    </service>
+    <service id=".service_locator.TJNRSaV.App\Controller\CategoryController" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator_context" id="App\Controller\CategoryController"/>
+      <argument>App\Controller\CategoryController</argument>
+      <argument type="service" id="service_container"/>
+      <factory service=".service_locator.TJNRSaV" method="withContext"/>
+    </service>
+    <service id=".service_locator.TJNRSaV.App\Controller\EquipmentController" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator_context" id="App\Controller\EquipmentController"/>
+      <argument>App\Controller\EquipmentController</argument>
+      <argument type="service" id="service_container"/>
+      <factory service=".service_locator.TJNRSaV" method="withContext"/>
+    </service>
+    <service id=".service_locator.TJNRSaV.App\Controller\LoanController" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator_context" id="App\Controller\LoanController"/>
+      <argument>App\Controller\LoanController</argument>
+      <argument type="service" id="service_container"/>
+      <factory service=".service_locator.TJNRSaV" method="withContext"/>
+    </service>
+    <service id=".service_locator.TJNRSaV.App\Controller\ReservationController" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator_context" id="App\Controller\ReservationController"/>
+      <argument>App\Controller\ReservationController</argument>
+      <argument type="service" id="service_container"/>
+      <factory service=".service_locator.TJNRSaV" method="withContext"/>
+    </service>
     <service id=".service_locator.TJNRSaV.controller.helper" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator_context" id="controller.helper"/>
       <argument>controller.helper</argument>
@@ -9042,6 +9388,11 @@
       <call method="allowControllers">
         <argument type="collection">
           <argument>App\Kernel</argument>
+          <argument>App\Controller\AuthController</argument>
+          <argument>App\Controller\CategoryController</argument>
+          <argument>App\Controller\EquipmentController</argument>
+          <argument>App\Controller\LoanController</argument>
+          <argument>App\Controller\ReservationController</argument>
           <argument>Doctrine\Bundle\DoctrineBundle\Controller\ProfilerController</argument>
         </argument>
       </call>
@@ -9792,6 +10143,41 @@
       <argument>false</argument>
       <argument type="service_closure" id="security.command.role_hierarchy_dump"/>
     </service>
+    <service id=".lexik_jwt_authentication.check_config_command.lazy" class="Symfony\Component\Console\Command\LazyCommand">
+      <argument>lexik:jwt:check-config</argument>
+      <argument type="collection"/>
+      <argument>Checks that the bundle is properly configured.</argument>
+      <argument>false</argument>
+      <argument type="service_closure" id="lexik_jwt_authentication.check_config_command"/>
+    </service>
+    <service id=".lexik_jwt_authentication.migrate_config_command.lazy" class="Symfony\Component\Console\Command\LazyCommand">
+      <argument>lexik:jwt:migrate-config</argument>
+      <argument type="collection"/>
+      <argument>Migrate LexikJWTAuthenticationBundle configuration to the Web-Token one.</argument>
+      <argument>false</argument>
+      <argument type="service_closure" id="lexik_jwt_authentication.migrate_config_command"/>
+    </service>
+    <service id=".lexik_jwt_authentication.enable_encryption_config_command.lazy" class="Symfony\Component\Console\Command\LazyCommand">
+      <argument>lexik:jwt:enable-encryption</argument>
+      <argument type="collection"/>
+      <argument>Enable Web-Token encryption support.</argument>
+      <argument>false</argument>
+      <argument type="service_closure" id="lexik_jwt_authentication.enable_encryption_config_command"/>
+    </service>
+    <service id=".lexik_jwt_authentication.generate_token_command.lazy" class="Symfony\Component\Console\Command\LazyCommand">
+      <argument>lexik:jwt:generate-token</argument>
+      <argument type="collection"/>
+      <argument>Generates a JWT token for a given user.</argument>
+      <argument>false</argument>
+      <argument type="service_closure" id="lexik_jwt_authentication.generate_token_command"/>
+    </service>
+    <service id=".lexik_jwt_authentication.generate_keypair_command.lazy" class="Symfony\Component\Console\Command\LazyCommand">
+      <argument>lexik:jwt:generate-keypair</argument>
+      <argument type="collection"/>
+      <argument>Generate public/private keys for use in your application.</argument>
+      <argument>false</argument>
+      <argument type="service_closure" id="lexik_jwt_authentication.generate_keypair_command"/>
+    </service>
     <service id=".maker.auto_command.make_auth.lazy" class="Symfony\Component\Console\Command\LazyCommand">
       <argument>make:auth</argument>
       <argument type="collection"/>
@@ -9988,7 +10374,7 @@
     </service>
     <service id="console.command_loader" class="Symfony\Component\Console\CommandLoader\ContainerCommandLoader" public="true">
       <tag name="container.no_preload"/>
-      <argument type="service" id=".service_locator.y.Xa4f4"/>
+      <argument type="service" id=".service_locator.OS12wz_"/>
       <argument type="collection">
         <argument key="about">console.command.about</argument>
         <argument key="assets:install">console.command.assets_install</argument>
@@ -10083,6 +10469,11 @@
         <argument key="security:hash-password">security.command.user_password_hash</argument>
         <argument key="debug:security:role-hierarchy">security.command.role_hierarchy_dump</argument>
         <argument key="doctrine:fixtures:load">doctrine.fixtures_load_command</argument>
+        <argument key="lexik:jwt:check-config">lexik_jwt_authentication.check_config_command</argument>
+        <argument key="lexik:jwt:migrate-config">lexik_jwt_authentication.migrate_config_command</argument>
+        <argument key="lexik:jwt:enable-encryption">lexik_jwt_authentication.enable_encryption_config_command</argument>
+        <argument key="lexik:jwt:generate-token">lexik_jwt_authentication.generate_token_command</argument>
+        <argument key="lexik:jwt:generate-keypair">lexik_jwt_authentication.generate_keypair_command</argument>
         <argument key="make:auth">maker.auto_command.make_auth</argument>
         <argument key="make:command">maker.auto_command.make_command</argument>
         <argument key="make:twig-component">maker.auto_command.make_twig_component</argument>
@@ -10115,7 +10506,7 @@
         <argument key="make:webhook">maker.auto_command.make_webhook</argument>
       </argument>
     </service>
-    <service id=".service_locator.y.Xa4f4" class="Symfony\Component\DependencyInjection\ServiceLocator">
+    <service id=".service_locator.OS12wz_" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
       <argument type="collection">
         <argument key="console.command.about" type="service_closure" id=".console.command.about.lazy"/>
@@ -10211,6 +10602,11 @@
         <argument key="security.command.user_password_hash" type="service_closure" id=".security.command.user_password_hash.lazy"/>
         <argument key="security.command.role_hierarchy_dump" type="service_closure" id=".security.command.role_hierarchy_dump.lazy"/>
         <argument key="doctrine.fixtures_load_command" type="service_closure" id="doctrine.fixtures_load_command"/>
+        <argument key="lexik_jwt_authentication.check_config_command" type="service_closure" id=".lexik_jwt_authentication.check_config_command.lazy"/>
+        <argument key="lexik_jwt_authentication.migrate_config_command" type="service_closure" id=".lexik_jwt_authentication.migrate_config_command.lazy"/>
+        <argument key="lexik_jwt_authentication.enable_encryption_config_command" type="service_closure" id=".lexik_jwt_authentication.enable_encryption_config_command.lazy"/>
+        <argument key="lexik_jwt_authentication.generate_token_command" type="service_closure" id=".lexik_jwt_authentication.generate_token_command.lazy"/>
+        <argument key="lexik_jwt_authentication.generate_keypair_command" type="service_closure" id=".lexik_jwt_authentication.generate_keypair_command.lazy"/>
         <argument key="maker.auto_command.make_auth" type="service_closure" id=".maker.auto_command.make_auth.lazy"/>
         <argument key="maker.auto_command.make_command" type="service_closure" id=".maker.auto_command.make_command.lazy"/>
         <argument key="maker.auto_command.make_twig_component" type="service_closure" id=".maker.auto_command.make_twig_component.lazy"/>
@@ -10502,6 +10898,14 @@
     <service id="logger" alias="monolog.logger"/>
     <service id="Psr\Log\LoggerInterface" alias="monolog.logger"/>
     <service id="doctrine.fixtures.provider" alias="doctrine.fixtures.loader"/>
+    <service id="Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface" alias="lexik_jwt_authentication.jwt_manager"/>
+    <service id="Lexik\Bundle\JWTAuthenticationBundle\Services\JWSProvider\JWSProviderInterface" alias="lexik_jwt_authentication.jws_provider.lcobucci"/>
+    <service id="Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler" alias="lexik_jwt_authentication.handler.authentication_success"/>
+    <service id="Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationFailureHandler" alias="lexik_jwt_authentication.handler.authentication_failure"/>
+    <service id="Lexik\Bundle\JWTAuthenticationBundle\TokenExtractor\TokenExtractorInterface" alias="lexik_jwt_authentication.extractor.chain_extractor"/>
+    <service id="lexik_jwt_authentication.encoder" alias="lexik_jwt_authentication.encoder.lcobucci" public="true"/>
+    <service id="Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface" alias="lexik_jwt_authentication.encoder.lcobucci"/>
+    <service id="lexik_jwt_authentication.key_loader" alias="lexik_jwt_authentication.key_loader.raw" public="true"/>
     <service id="container.env_var_processors_locator" alias=".service_locator.ryAvHi4" public="true"/>
     <service id="twig.loader.filesystem" alias="twig.loader.native_filesystem"/>
     <service id="argument_resolver.controller_locator" alias=".service_locator.8JS6QTA"/>
