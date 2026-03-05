@@ -83,7 +83,7 @@
     </parameter>
     <parameter key="kernel.charset">UTF-8</parameter>
     <parameter key="kernel.container_class">App_KernelDevDebugContainer</parameter>
-    <parameter key="kernel.share_dir">C:\Users\natou\Desktop\PeriGreen\server/var/share/dev</parameter>
+    <parameter key="kernel.share_dir">C:\Users\natou\Desktop\PeriGreen\server\var\share\dev</parameter>
     <parameter key=".container.known_envs" type="collection">
       <parameter>dev</parameter>
       <parameter>test</parameter>
@@ -365,6 +365,58 @@
     <service id="App\DataFixtures\AppFixtures" class="App\DataFixtures\AppFixtures" autowire="true" autoconfigure="true">
       <tag name="doctrine.fixture.orm"/>
     </service>
+    <service id="App\Entity\Category" class="App\Entity\Category" autowire="true" autoconfigure="true">
+      <tag name="container.excluded" source="because it's a Doctrine entity"/>
+      <tag name="container.excluded" source="with #[Doctrine\ORM\Mapping\Entity] attribute"/>
+    </service>
+    <service id="App\Entity\Equipment" class="App\Entity\Equipment" autowire="true" autoconfigure="true">
+      <tag name="container.excluded" source="because it's a Doctrine entity"/>
+      <tag name="container.excluded" source="with #[Doctrine\ORM\Mapping\Entity] attribute"/>
+    </service>
+    <service id="App\Entity\Loan" class="App\Entity\Loan" autowire="true" autoconfigure="true">
+      <tag name="container.excluded" source="because it's a Doctrine entity"/>
+      <tag name="container.excluded" source="with #[Doctrine\ORM\Mapping\Entity] attribute"/>
+    </service>
+    <service id="App\Entity\Reservation" class="App\Entity\Reservation" autowire="true" autoconfigure="true">
+      <tag name="container.excluded" source="because it's a Doctrine entity"/>
+      <tag name="container.excluded" source="with #[Doctrine\ORM\Mapping\Entity] attribute"/>
+    </service>
+    <service id="App\Entity\User" class="App\Entity\User" autowire="true" autoconfigure="true">
+      <tag name="container.excluded" source="because it's a Doctrine entity"/>
+      <tag name="container.excluded" source="with #[Doctrine\ORM\Mapping\Entity] attribute"/>
+    </service>
+    <service id="App\Enum\EtatMateriel" class="App\Enum\EtatMateriel" autowire="true" autoconfigure="true">
+      <tag name="container.excluded" source="because it's an enum"/>
+    </service>
+    <service id="App\Enum\LoanStatus" class="App\Enum\LoanStatus" autowire="true" autoconfigure="true">
+      <tag name="container.excluded" source="because it's an enum"/>
+    </service>
+    <service id="App\Enum\Role" class="App\Enum\Role" autowire="true" autoconfigure="true">
+      <tag name="container.excluded" source="because it's an enum"/>
+    </service>
+    <service id="App\Enum\StatutReservation" class="App\Enum\StatutReservation" autowire="true" autoconfigure="true">
+      <tag name="container.excluded" source="because it's an enum"/>
+    </service>
+    <service id="App\Repository\CategoryRepository" class="App\Repository\CategoryRepository" autowire="true" autoconfigure="true">
+      <tag name="doctrine.repository_service"/>
+      <argument type="service" id="doctrine"/>
+    </service>
+    <service id="App\Repository\EquipmentRepository" class="App\Repository\EquipmentRepository" autowire="true" autoconfigure="true">
+      <tag name="doctrine.repository_service"/>
+      <argument type="service" id="doctrine"/>
+    </service>
+    <service id="App\Repository\LoanRepository" class="App\Repository\LoanRepository" autowire="true" autoconfigure="true">
+      <tag name="doctrine.repository_service"/>
+      <argument type="service" id="doctrine"/>
+    </service>
+    <service id="App\Repository\ReservationRepository" class="App\Repository\ReservationRepository" autowire="true" autoconfigure="true">
+      <tag name="doctrine.repository_service"/>
+      <argument type="service" id="doctrine"/>
+    </service>
+    <service id="App\Repository\UserRepository" class="App\Repository\UserRepository" autowire="true" autoconfigure="true">
+      <tag name="doctrine.repository_service"/>
+      <argument type="service" id="doctrine"/>
+    </service>
     <service id="argument_metadata_factory" class="Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadataFactory"/>
     <service id="argument_resolver.backed_enum_resolver" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\BackedEnumValueResolver">
       <tag name="Symfony\Component\HttpKernel\Controller\ArgumentResolver\BackedEnumValueResolver" priority="100">controller.argument_value_resolver</tag>
@@ -487,7 +539,7 @@
       </argument>
     </service>
     <service id="http_cache.store" class="Symfony\Component\HttpKernel\HttpCache\Store">
-      <argument>C:\Users\natou\Desktop\PeriGreen\server/var/share/dev/http_cache</argument>
+      <argument>C:\Users\natou\Desktop\PeriGreen\server\var\share\dev/http_cache</argument>
     </service>
     <service id="url_helper" class="Symfony\Component\HttpFoundation\UrlHelper">
       <argument type="service" id="request_stack"/>
@@ -1599,7 +1651,7 @@
       <tag name="monolog.logger" channel="cache"/>
       <argument/>
       <argument>0</argument>
-      <argument>C:\Users\natou\Desktop\PeriGreen\server/var/share/dev/pools/app</argument>
+      <argument>C:\Users\natou\Desktop\PeriGreen\server\var\share\dev/pools/app</argument>
       <argument type="service" id="cache.default_marshaller" on-invalid="ignore"/>
       <call method="setLogger">
         <argument type="service" id="monolog.logger.cache" on-invalid="ignore"/>
@@ -5460,7 +5512,7 @@
     <service id="doctrine.orm.configuration" class="Doctrine\ORM\Configuration" abstract="true"/>
     <service id="doctrine.orm.entity_manager.abstract" class="Doctrine\ORM\EntityManager" lazy="true" abstract="true"/>
     <service id="doctrine.orm.container_repository_factory" class="Doctrine\Bundle\DoctrineBundle\Repository\ContainerRepositoryFactory">
-      <argument type="service" id=".service_locator.dpiLQ5O"/>
+      <argument type="service" id=".service_locator.h0IQFfI"/>
     </service>
     <service id="doctrine.orm.manager_configurator.abstract" class="Doctrine\Bundle\DoctrineBundle\ManagerConfigurator" abstract="true">
       <argument type="collection"/>
@@ -6821,7 +6873,7 @@
       <tag name="monolog.logger" channel="security"/>
       <argument type="service" id="security.untracked_token_storage"/>
       <argument type="iterator">
-        <argument type="service" id="security.user.provider.concrete.users_in_memory"/>
+        <argument type="service" id="security.user.provider.concrete.app_user_provider"/>
       </argument>
       <argument type="abstract">Provider Key</argument>
       <argument type="service" id="monolog.logger.security" on-invalid="null"/>
@@ -6947,7 +6999,7 @@
     </service>
     <service id="security.listener.user_provider" class="Symfony\Component\Security\Http\EventListener\UserProviderListener">
       <tag name="kernel.event_listener" event="Symfony\Component\Security\Http\Event\CheckPassportEvent" priority="1024" method="checkPassport"/>
-      <argument type="service" id="security.user.provider.concrete.users_in_memory"/>
+      <argument type="service" id="security.user.provider.concrete.app_user_provider"/>
     </service>
     <service id="security.listener.user_provider.abstract" class="Symfony\Component\Security\Http\EventListener\UserProviderListener" abstract="true">
       <argument type="abstract">user provider</argument>
@@ -7185,8 +7237,11 @@
         <argument>Display information about your security firewall(s)</argument>
       </call>
     </service>
-    <service id="security.user.provider.concrete.users_in_memory" class="Symfony\Component\Security\Core\User\InMemoryUserProvider">
-      <argument type="collection"/>
+    <service id="security.user.provider.concrete.app_user_provider" class="Symfony\Bridge\Doctrine\Security\User\EntityUserProvider">
+      <argument type="service" id="doctrine"/>
+      <argument>App\Entity\User</argument>
+      <argument>email</argument>
+      <argument>null</argument>
     </service>
     <service id="security.firewall.map.config.dev" class="Symfony\Bundle\SecurityBundle\Security\FirewallConfig">
       <argument>dev</argument>
@@ -7223,7 +7278,7 @@
       <argument>null</argument>
       <argument>true</argument>
       <argument>false</argument>
-      <argument>security.user.provider.concrete.users_in_memory</argument>
+      <argument>security.user.provider.concrete.app_user_provider</argument>
       <argument>main</argument>
       <argument>null</argument>
       <argument>null</argument>
@@ -7234,7 +7289,7 @@
     </service>
     <service id="security.listener.main.user_provider" class="Symfony\Component\Security\Http\EventListener\UserProviderListener">
       <tag name="kernel.event_listener" dispatcher="debug.security.event_dispatcher.main" event="Symfony\Component\Security\Http\Event\CheckPassportEvent" priority="2048" method="checkPassport"/>
-      <argument type="service" id="security.user.provider.concrete.users_in_memory"/>
+      <argument type="service" id="security.user.provider.concrete.app_user_provider"/>
     </service>
     <service id="security.user_checker.chain.main" class="Symfony\Component\Security\Core\User\ChainUserChecker">
       <argument type="tagged_iterator" tag="security.user_checker.main"/>
@@ -7244,7 +7299,7 @@
       <tag name="container.hot_path"/>
       <argument type="service" id="security.untracked_token_storage"/>
       <argument type="iterator">
-        <argument type="service" id="security.user.provider.concrete.users_in_memory"/>
+        <argument type="service" id="security.user.provider.concrete.app_user_provider"/>
       </argument>
       <argument>main</argument>
       <argument type="service" id="monolog.logger.security" on-invalid="null"/>
@@ -7621,6 +7676,34 @@
     </service>
     <service id=".instanceof.Doctrine\Bundle\FixturesBundle\ORMFixtureInterface.0.App\DataFixtures\AppFixtures" class="App\DataFixtures\AppFixtures" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\DataFixtures\AppFixtures" class="App\DataFixtures\AppFixtures" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.App\Entity\Category.0.App\Entity\Category" class="App\Entity\Category" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Entity\Category" class="App\Entity\Category" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.App\Entity\Equipment.0.App\Entity\Equipment" class="App\Entity\Equipment" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Entity\Equipment" class="App\Entity\Equipment" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.App\Entity\Loan.0.App\Entity\Loan" class="App\Entity\Loan" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Entity\Loan" class="App\Entity\Loan" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.App\Entity\Reservation.0.App\Entity\Reservation" class="App\Entity\Reservation" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Entity\Reservation" class="App\Entity\Reservation" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.App\Entity\User.0.App\Entity\User" class="App\Entity\User" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Entity\User" class="App\Entity\User" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.UnitEnum.0.App\Enum\EtatMateriel" class="App\Enum\EtatMateriel" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Enum\EtatMateriel" class="App\Enum\EtatMateriel" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.UnitEnum.0.App\Enum\LoanStatus" class="App\Enum\LoanStatus" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Enum\LoanStatus" class="App\Enum\LoanStatus" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.UnitEnum.0.App\Enum\Role" class="App\Enum\Role" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Enum\Role" class="App\Enum\Role" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.UnitEnum.0.App\Enum\StatutReservation" class="App\Enum\StatutReservation" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Enum\StatutReservation" class="App\Enum\StatutReservation" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\CategoryRepository" class="App\Repository\CategoryRepository" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Repository\CategoryRepository" class="App\Repository\CategoryRepository" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\EquipmentRepository" class="App\Repository\EquipmentRepository" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Repository\EquipmentRepository" class="App\Repository\EquipmentRepository" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\LoanRepository" class="App\Repository\LoanRepository" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Repository\LoanRepository" class="App\Repository\LoanRepository" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\ReservationRepository" class="App\Repository\ReservationRepository" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Repository\ReservationRepository" class="App\Repository\ReservationRepository" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\UserRepository" class="App\Repository\UserRepository" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Repository\UserRepository" class="App\Repository\UserRepository" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".service_locator.ryAvHi4" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
       <argument type="collection">
@@ -8484,9 +8567,15 @@
         <argument key="turbo.doctrine.event_listener" type="service_closure" id="turbo.doctrine.event_listener"/>
       </argument>
     </service>
-    <service id=".service_locator.dpiLQ5O" class="Symfony\Component\DependencyInjection\ServiceLocator">
+    <service id=".service_locator.h0IQFfI" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
-      <argument type="collection"/>
+      <argument type="collection">
+        <argument key="App\Repository\CategoryRepository" type="service_closure" id="App\Repository\CategoryRepository"/>
+        <argument key="App\Repository\EquipmentRepository" type="service_closure" id="App\Repository\EquipmentRepository"/>
+        <argument key="App\Repository\LoanRepository" type="service_closure" id="App\Repository\LoanRepository"/>
+        <argument key="App\Repository\ReservationRepository" type="service_closure" id="App\Repository\ReservationRepository"/>
+        <argument key="App\Repository\UserRepository" type="service_closure" id="App\Repository\UserRepository"/>
+      </argument>
     </service>
     <service id=".service_locator.W55Po6X" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
@@ -8832,6 +8921,10 @@
       <argument type="collection">
         <argument key="reverse_container" type="service_closure" id="reverse_container" on-invalid="ignore_uninitialized"/>
       </argument>
+    </service>
+    <service id=".service_locator.dpiLQ5O" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection"/>
     </service>
     <service id=".service_locator.6eloqTE" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
@@ -10150,7 +10243,7 @@
     <service id="cache.app.recorder_inner" class="Symfony\Component\Cache\Adapter\FilesystemAdapter">
       <argument>Zw8sz1XbWQ</argument>
       <argument>0</argument>
-      <argument>C:\Users\natou\Desktop\PeriGreen\server/var/share/dev/pools/app</argument>
+      <argument>C:\Users\natou\Desktop\PeriGreen\server\var\share\dev/pools/app</argument>
       <argument type="service" id="cache.default_marshaller" on-invalid="ignore"/>
       <call method="setLogger">
         <argument type="service" id="monolog.logger.cache" on-invalid="ignore"/>
@@ -10199,7 +10292,7 @@
     <service id="cache.messenger.restart_workers_signal.recorder_inner" class="Symfony\Component\Cache\Adapter\FilesystemAdapter">
       <argument>i5a12HVwOS</argument>
       <argument>0</argument>
-      <argument>C:\Users\natou\Desktop\PeriGreen\server/var/share/dev/pools/app</argument>
+      <argument>C:\Users\natou\Desktop\PeriGreen\server\var\share\dev/pools/app</argument>
       <argument type="service" id="cache.default_marshaller" on-invalid="ignore"/>
       <call method="setLogger">
         <argument type="service" id="monolog.logger.cache" on-invalid="ignore"/>
@@ -10208,7 +10301,7 @@
     <service id="cache.http_client.pool.recorder_inner" class="Symfony\Component\Cache\Adapter\FilesystemAdapter">
       <argument>1P74ksPemx</argument>
       <argument>0</argument>
-      <argument>C:\Users\natou\Desktop\PeriGreen\server/var/share/dev/pools/app</argument>
+      <argument>C:\Users\natou\Desktop\PeriGreen\server\var\share\dev/pools/app</argument>
       <argument type="service" id="cache.default_marshaller" on-invalid="ignore"/>
       <call method="setLogger">
         <argument type="service" id="monolog.logger.cache" on-invalid="ignore"/>
@@ -10400,8 +10493,8 @@
     <service id="Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface" alias="security.user_password_hasher"/>
     <service id="Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface" alias="security.user_authenticator"/>
     <service id="security.firewall" alias="debug.security.firewall"/>
-    <service id="security.user_providers" alias="security.user.provider.concrete.users_in_memory"/>
-    <service id="Symfony\Component\Security\Core\User\UserProviderInterface" alias="security.user.provider.concrete.users_in_memory"/>
+    <service id="security.user_providers" alias="security.user.provider.concrete.app_user_provider"/>
+    <service id="Symfony\Component\Security\Core\User\UserProviderInterface" alias="security.user.provider.concrete.app_user_provider"/>
     <service id="security.authentication.session_strategy.main" alias="security.authentication.session_strategy"/>
     <service id="security.user_checker.main" alias="security.user_checker"/>
     <service id="security.firewall.context_locator" alias=".service_locator.Bz.C4As"/>
