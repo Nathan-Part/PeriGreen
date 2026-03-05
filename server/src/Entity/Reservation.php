@@ -33,11 +33,11 @@ class Reservation
     #[ORM\JoinColumn(nullable: false)]
     private ?Equipment $equipment = null;
 
-    #[ORM\ManyToOne(inversedBy: 'reservations')]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $requester = null;
 
-    #[ORM\ManyToOne(inversedBy: 'reservations')]
+    #[ORM\ManyToOne]
     private ?User $approver = null;
 
     public function getId(): ?int

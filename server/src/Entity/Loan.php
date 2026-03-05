@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\LoanRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Enum\LoanStatus;
 
 #[ORM\Entity(repositoryClass: LoanRepository::class)]
 class Loan
@@ -23,8 +24,8 @@ class Loan
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $returnDate = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $status = null;
+    #[ORM\Column(enumType: LoanStatus::class)]
+    private ?LoanStatus $status = null;
 
     #[ORM\Column]
     private ?int $quantity = null;
@@ -85,12 +86,12 @@ class Loan
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): ?LoanStatus
     {
         return $this->status;
     }
 
-    public function setStatus(string $status): static
+    public function setStatus(LoanStatus $status): static
     {
         $this->status = $status;
 
