@@ -14,6 +14,7 @@
 ### Environment files (keep .env, ignore local overrides) ###
 /.env.local
 /.env.*.local
+/.env
 
 ### Logs / caches ###
 *.log
