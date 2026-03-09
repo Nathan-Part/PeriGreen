@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\User;
@@ -23,12 +24,10 @@ final class AuthController extends AbstractController
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
-        // Vérification des champs obligatoires
         if (empty($data['email']) || empty($data['password']) || empty($data['fullName']) || empty($data['universityId'])) {
             return $this->json(['error' => 'Champs manquants'], 400);
         }
 
-        // Vérifier si l'email existe déjà
         if ($userRepository->findOneBy(['email' => $data['email']])) {
             return $this->json(['error' => 'Email déjà utilisé'], 409);
         }
@@ -47,11 +46,26 @@ final class AuthController extends AbstractController
 
         return $this->json(['message' => 'Compte créé avec succès'], 201);
     }
+
     #[Route('/login', name: 'app_auth_login', methods: ['POST'])]
-public function login(): JsonResponse
-{
-    // Cette méthode ne sera jamais exécutée
-    // json_login intercepte la requête avant
-    throw new \Exception('Cette route est gérée par security.yaml');
-}
+    public function login(): JsonResponse
+    {
+        // Cette méthode ne sera jamais exécutée
+        // json_login intercepte la requête avant
+        throw new \Exception('Cette route est gérée par security.yaml');
+    }
+
+    #[Route('/me', name: 'app_auth_me', methods: ['GET'])]
+    public function me(): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json(['message' => 'Unauthorized'], 401);
+        }
+        return $this->json([
+            'id'    => $user->getId(),
+            'email' => $user->getUserIdentifier(),
+            'roles' => $user->getRoles(),
+        ]);
+    }
 }
