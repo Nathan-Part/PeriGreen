@@ -59,3 +59,10 @@ Thumbs.db
 ###> lexik/jwt-authentication-bundle ###
 /config/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
+
+### Frontend Vite ###
+client/node_modules/
+client/dist/
+client/.vite/
+client/.env.local
+client/.env
