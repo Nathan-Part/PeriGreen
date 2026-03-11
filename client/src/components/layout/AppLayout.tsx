@@ -1,11 +1,10 @@
-import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Laptop, Archive, BarChart3, Menu, Bell } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { motion } from 'framer-motion';
 
 const navigation = [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Inventaire', href: '/inventory', icon: Laptop },
     { name: 'Emprunts', href: '/loans', icon: Archive },
     { name: 'Statistiques', href: '/stats', icon: BarChart3 },
@@ -24,7 +23,7 @@ export const AppLayout = () => {
                 className="w-64 bg-white border-r border-border hidden md:flex flex-col"
             >
                 <div className="h-16 flex items-center px-6 border-b border-border">
-                    <Link to="/" className="flex items-center gap-2 group">
+                    <Link to="/dashboard" className="flex items-center gap-2 group">
                         <div className="h-8 w-8 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center group-hover:bg-primary-500 group-hover:text-white transition-colors">
                             <Laptop size={18} strokeWidth={2.5} />
                         </div>

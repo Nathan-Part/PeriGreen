@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
 
 // Lazy loading pages for better performance and clean structure
+const Home = lazy(() => import('./pages/Home'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Inventory = lazy(() => import('./pages/Inventory'));
 const EquipmentDetail = lazy(() => import('./pages/EquipmentDetail'));
@@ -22,8 +23,9 @@ function App() {
     <BrowserRouter>
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
+          <Route path="/" element={<Home />} />
           <Route path="/" element={<AppLayout />}>
-            <Route index element={<Dashboard />} />
+            <Route path="dashboard" element={<Dashboard />} />
             <Route path="inventory" element={<Inventory />} />
             <Route path="inventory/:id" element={<EquipmentDetail />} />
             <Route path="loans" element={<Loans />} />
