@@ -1,68 +1,284 @@
-import type { Equipment, Loan, User } from '../types';
-import { mockEquipment, mockLoans, mockUsers } from '../mocks';
-import type { LoanFormData } from '../types/schemas';
+const API_BASE_URL = 'http://localhost:8000';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-const DELAY_MS = 600;
+// Token management
+const getToken = (): string | null => localStorage.getItem('token');
+
+export const setToken = (token: string) => {
+  localStorage.setItem('token', token);
+};
+
+export const removeToken = () => {
+  localStorage.removeItem('token');
+};
+
+export const getStoredUser = () => {
+  const user = localStorage.getItem('user');
+  return user ? JSON.parse(user) : null;
+};
+
+export const setStoredUser = (user: object) => {
+  localStorage.setItem('user', JSON.stringify(user));
+};
+
+export const removeStoredUser = () => {
+  localStorage.removeItem('user');
+};
+
+// Generic fetch with auth
+const fetchApi = async <T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> => {
+  const token = getToken();
+
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  if (token) {
+    (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Une erreur est survenue' }));
+    throw new Error(error.message || error.error || 'Erreur API');
+  }
+
+  return response.json();
+};
+
+// Auth API
+export const login = async (email: string, password: string) => {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Identifiants invalides' }));
+    throw new Error(error.message || error.error || 'Erreur de connexion');
+  }
+
+  // Get the token from response - JWT is returned
+  const data = await response.json();
+  if (data.token) {
+    setToken(data.token);
+  }
+
+  // Fetch current user
+  const user = await getCurrentUser();
+  setStoredUser(user);
+
+  return user;
+};
+
+export const register = async (userData: {
+  email: string;
+  password: string;
+  fullName: string;
+  universityId: string;
+}) => {
+  return fetchApi<{ message: string }>('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(userData),
+  });
+};
+
+export const getCurrentUser = async () => {
+  return fetchApi<{ id: number; email: string; roles: string[] }>('/auth/me');
+};
+
+export const logout = () => {
+  removeToken();
+  removeStoredUser();
+};
+
+// Equipment API
+export interface Equipment {
+  id: number;
+  name: string;
+  description: string;
+  brand: string;
+  model: string;
+  serialNumber: string;
+  etat: string;
+  totalQuantity: number;
+  imageUrl: string;
+  category: {
+    id: number;
+    name: string;
+  };
+}
 
 export const getEquipments = async (): Promise<Equipment[]> => {
-    await delay(DELAY_MS);
-    return [...mockEquipment];
+  return fetchApi<Equipment[]>('/api/equipments');
 };
 
-export const getEquipmentById = async (id: string): Promise<Equipment | undefined> => {
-    await delay(DELAY_MS);
-    return mockEquipment.find(e => e.id === id);
+export const getEquipmentById = async (id: number): Promise<Equipment> => {
+  return fetchApi<Equipment>(`/api/equipments/${id}`);
 };
 
-export const createLoan = async (data: LoanFormData): Promise<Loan> => {
-    await delay(DELAY_MS);
-
-    const equipmentIndex = mockEquipment.findIndex(e => e.id === data.equipmentId);
-    if (equipmentIndex === -1) {
-        throw new Error("L'équipement n'existe pas.");
-    }
-
-    const equipment = mockEquipment[equipmentIndex];
-    if (equipment.status !== 'AVAILABLE') {
-        throw new Error("L'équipement n'est pas disponible pour le moment.");
-    }
-
-    // Update logic: Mutating global mock to reflect state change
-    mockEquipment[equipmentIndex] = {
-        ...equipment,
-        status: 'IN_USE',
-    };
-
-    const newLoan: Loan = {
-        id: `loan_${Date.now()}`,
-        equipmentId: data.equipmentId,
-        userId: data.userId,
-        startDate: data.startDate,
-        expectedEndDate: data.expectedEndDate,
-        notes: data.notes,
-        status: 'ACTIVE',
-    };
-
-    mockLoans.push(newLoan);
-
-    return {
-        ...newLoan,
-        equipment: mockEquipment[equipmentIndex],
-        user: mockUsers.find(u => u.id === data.userId),
-    };
+export const createEquipment = async (data: Partial<Equipment>) => {
+  return fetchApi<Equipment>('/api/equipments', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 };
+
+export const updateEquipment = async (id: number, data: Partial<Equipment>) => {
+  return fetchApi<Equipment>(`/api/equipments/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+export const deleteEquipment = async (id: number) => {
+  return fetchApi<{ message: string }>(`/api/equipments/${id}`, {
+    method: 'DELETE',
+  });
+};
+
+// Category API
+export interface Category {
+  id: number;
+  name: string;
+}
+
+export const getCategories = async (): Promise<Category[]> => {
+  return fetchApi<Category[]>('/api/categories');
+};
+
+// Loan API
+export interface Loan {
+  id: number;
+  pickupDate: string;
+  dueDate: string;
+  returnDate?: string;
+  status: string;
+  quantity: number;
+  returnNote?: string;
+  equipment: {
+    id: number;
+    name: string;
+  };
+  borrower: {
+    id: number;
+    email: string;
+  };
+  reservation: {
+    id: number;
+  };
+}
 
 export const getLoans = async (): Promise<Loan[]> => {
-    await delay(DELAY_MS);
-    return mockLoans.map(loan => ({
-        ...loan,
-        equipment: mockEquipment.find(e => e.id === loan.equipmentId),
-        user: mockUsers.find(u => u.id === loan.userId)
-    }));
+  return fetchApi<Loan[]>('/api/loans');
 };
 
+export const getLoanById = async (id: number): Promise<Loan> => {
+  return fetchApi<Loan>(`/api/loans/${id}`);
+};
+
+export const createLoan = async (data: {
+  pickupDate: string;
+  dueDate: string;
+  status: string;
+  quantity: number;
+  reservationId: number;
+  equipmentId: number;
+  borrowerId: number;
+}) => {
+  return fetchApi<Loan>('/api/loans', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
+export const updateLoan = async (id: number, data: Partial<Loan>) => {
+  return fetchApi<Loan>(`/api/loans/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+export const deleteLoan = async (id: number) => {
+  return fetchApi<{ message: string }>(`/api/loans/${id}`, {
+    method: 'DELETE',
+  });
+};
+
+// Reservation API
+export interface Reservation {
+  id: number;
+  createdAt: string;
+  status: string;
+  quantity: number;
+  validatedAt?: string;
+  decisionNote?: string;
+  equipment: {
+    id: number;
+    name: string;
+  };
+  requester: {
+    id: number;
+    email: string;
+  };
+  approver?: {
+    id: number;
+    email: string;
+  };
+}
+
+export const getReservations = async (): Promise<Reservation[]> => {
+  return fetchApi<Reservation[]>('/api/reservations');
+};
+
+export const getReservationById = async (id: number): Promise<Reservation> => {
+  return fetchApi<Reservation>(`/api/reservations/${id}`);
+};
+
+export const createReservation = async (data: {
+  quantity: number;
+  status: string;
+  equipmentId: number;
+  requesterId: number;
+}) => {
+  return fetchApi<Reservation>('/api/reservations', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
+export const updateReservation = async (id: number, data: Partial<Reservation>) => {
+  return fetchApi<Reservation>(`/api/reservations/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+export const deleteReservation = async (id: number) => {
+  return fetchApi<{ message: string }>(`/api/reservations/${id}`, {
+    method: 'DELETE',
+  });
+};
+
+// User API
+export interface User {
+  id: number;
+  email: string;
+  fullName: string;
+  universityId: string;
+  role: string;
+}
+
 export const getUsers = async (): Promise<User[]> => {
-    await delay(DELAY_MS);
-    return [...mockUsers];
+  return fetchApi<User[]>('/api/users');
 };
