@@ -6,7 +6,7 @@ import { cn } from '../../lib/utils';
 const navItems = [
     { label: 'Accueil', href: '#top' },
     { label: 'Inscription', href: '#signup' },
-    { label: 'Espace etudiant', href: '#student-space' },
+    { label: 'Espace étudiant', href: '#student-space' },
     { label: 'Espace admin', href: '#admin-space' },
 ];
 

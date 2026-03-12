@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 
 const footerLinks = [
     { label: 'Accueil', href: '#top' },
-    { label: 'Fonctionnalites', href: '#features' },
-    { label: 'Benefices', href: '#admin-space' },
-    { label: 'Decouvrir', href: '#signup' },
+    { label: 'Fonctionnalités', href: '#features' },
+    { label: 'Bénéfices', href: '#admin-space' },
+    { label: 'Découvrir', href: '#signup' },
 ];
 
 export function PublicFooter() {
@@ -20,8 +20,8 @@ export function PublicFooter() {
                         <span className="text-xl font-bold tracking-tight">PeriGreen</span>
                     </div>
                     <p className="mt-4 text-sm leading-7 text-[#1b5e4b]">
-                        PeriGreen aide l&apos;universite a mettre du materiel a disposition des etudiants dans une logique de
-                        reemploi, de reduction du gaspillage et de diminution de l&apos;empreinte carbone.
+                        PeriGreen aide l&apos;université à mettre du matériel à disposition des étudiants dans une logique de
+                        réemploi, de réduction du gaspillage et de diminution de l&apos;empreinte carbone.
                     </p>
                 </div>
 
