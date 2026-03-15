@@ -34,14 +34,14 @@ export default function Home() {
                 {/* Section Impact */}
                 <Impact />
 
-                {/* Section Équipe projet */}
-                <Team />
-
                 {/* Section Témoignages étudiants */}
                 <Testimonials />
 
                 {/* Section Call To Action */}
                 <CTA />
+
+                {/* Section Équipe projet */}
+                <Team />
             </main>
 
             <PublicFooter />
