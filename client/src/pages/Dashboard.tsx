@@ -182,7 +182,7 @@ export default function Dashboard() {
                                                 <div>
                                                     <p className="font-semibold text-gray-900">{loan.equipment?.name ?? 'Matériel inconnu'}</p>
                                                     <p className="text-sm text-gray-500">
-                                                        Emprunté par : {loan.user?.firstName} {loan.user?.lastName}
+                                                        Emprunteur : {loan.borrower?.email ?? 'Inconnu'}
                                                     </p>
                                                 </div>
                                             </div>
@@ -190,7 +190,7 @@ export default function Dashboard() {
                                                 <div className="text-right">
                                                     <p className="text-[10px] uppercase tracking-widest text-gray-400">Échéance</p>
                                                     <p className={loan.status === 'OVERDUE' ? 'text-red-600 font-bold' : 'text-gray-800'}>
-                                                        {loan.expectedEndDate}
+                                                        {loan.dueDate ?? 'Non définie'}
                                                     </p>
                                                 </div>
                                                 <Badge variant={loan.status === 'OVERDUE' ? 'danger' : 'info'}>

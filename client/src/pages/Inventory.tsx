@@ -6,7 +6,6 @@ import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Search, Filter, Laptop, Smartphone, Monitor, HardDrive, Package } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import type { EquipmentStatus } from '../types';
 
 const CATEGORY_ICONS: Record<string, any> = {
     'Portable': Laptop,
@@ -16,27 +15,38 @@ const CATEGORY_ICONS: Record<string, any> = {
     'Périphérique': Package,
 };
 
+const ETAT_BADGE: Record<string, JSX.Element> = {
+    'bon': <Badge variant="success">Bon état</Badge>,
+    'bon état': <Badge variant="success">Bon état</Badge>,
+    'moyen': <Badge variant="warning">État moyen</Badge>,
+    'mauvais': <Badge variant="danger">Mauvais état</Badge>,
+    'neuf': <Badge variant="info">Neuf</Badge>,
+};
+
 export default function Inventory() {
     const { data: equipments, isLoading } = useEquipments();
     const [search, setSearch] = useState('');
-    const [statusFilter, setStatusFilter] = useState<string>('ALL');
+    const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
+
+    // Collect unique category names for filter dropdown
+    const categories = equipments
+        ? [...new Set(equipments.map(eq => (typeof eq.category === 'object' ? eq.category.name : eq.category)))]
+        : [];
 
     const filteredEquipments = equipments?.filter(eq => {
-        const matchesSearch = eq.name.toLowerCase().includes(search.toLowerCase()) ||
-            eq.reference.toLowerCase().includes(search.toLowerCase());
-        const matchesStatus = statusFilter === 'ALL' || eq.status === statusFilter;
-        return matchesSearch && matchesStatus;
+        const categoryName = typeof eq.category === 'object' ? eq.category.name : eq.category;
+        const matchesSearch =
+            eq.name.toLowerCase().includes(search.toLowerCase()) ||
+            (eq.brand ?? '').toLowerCase().includes(search.toLowerCase()) ||
+            (eq.model ?? '').toLowerCase().includes(search.toLowerCase()) ||
+            (eq.serialNumber ?? '').toLowerCase().includes(search.toLowerCase());
+        const matchesCategory = categoryFilter === 'ALL' || categoryName === categoryFilter;
+        return matchesSearch && matchesCategory;
     });
 
-    const getStatusBadge = (status: EquipmentStatus) => {
-        switch (status) {
-            case 'AVAILABLE': return <Badge variant="success">Disponible</Badge>;
-            case 'IN_USE': return <Badge variant="info">En cours d'emprunt</Badge>;
-            case 'MAINTENANCE': return <Badge variant="warning">En maintenance</Badge>;
-            case 'RETIRED': return <Badge variant="default">Ancien</Badge>;
-            case 'LOST': return <Badge variant="danger">Perdu</Badge>;
-            default: return <Badge variant="default">{status}</Badge>;
-        }
+    const getEtatBadge = (etat: string) => {
+        const lower = (etat ?? '').toLowerCase();
+        return ETAT_BADGE[lower] ?? <Badge variant="default">{etat}</Badge>;
     };
 
     return (
@@ -52,7 +62,7 @@ export default function Inventory() {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors" size={18} />
                         <input
                             type="text"
-                            placeholder="Rechercher par nom, référence..."
+                            placeholder="Rechercher par nom, marque, modèle..."
                             className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all font-medium placeholder:text-gray-400"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -60,14 +70,14 @@ export default function Inventory() {
                     </div>
 
                     <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
+                        value={categoryFilter}
+                        onChange={(e) => setCategoryFilter(e.target.value)}
                         className="bg-white border border-gray-200 rounded-xl px-4 py-2 font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 cursor-pointer"
                     >
-                        <option value="ALL">Tous les statuts</option>
-                        <option value="AVAILABLE">Disponible</option>
-                        <option value="IN_USE">En cours d'emprunt</option>
-                        <option value="MAINTENANCE">En maintenance</option>
+                        <option value="ALL">Toutes les catégories</option>
+                        {categories.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
                     </select>
                 </div>
             </div>
@@ -91,7 +101,8 @@ export default function Inventory() {
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                     >
                         {filteredEquipments.map((equipment) => {
-                            const Icon = CATEGORY_ICONS[equipment.category] || Package;
+                            const categoryName = typeof equipment.category === 'object' ? equipment.category.name : equipment.category;
+                            const Icon = CATEGORY_ICONS[categoryName] || Package;
                             return (
                                 <motion.div
                                     key={equipment.id}
@@ -107,27 +118,27 @@ export default function Inventory() {
                                                 <div className="p-2.5 bg-white border border-gray-100 rounded-xl text-primary-600 group-hover:bg-primary-500 group-hover:text-white transition-colors">
                                                     <Icon size={20} />
                                                 </div>
-                                                {getStatusBadge(equipment.status)}
+                                                {equipment.etat ? getEtatBadge(equipment.etat) : <Badge variant="default">—</Badge>}
                                             </div>
                                             <div className="mt-4">
                                                 <CardTitle className="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors line-clamp-1">{equipment.name}</CardTitle>
-                                                <p className="text-xs font-mono text-gray-400 mt-1">{equipment.reference}</p>
+                                                <p className="text-xs font-mono text-gray-400 mt-1">{equipment.brand} {equipment.model}</p>
                                             </div>
                                         </CardHeader>
                                         <CardContent className="flex-1 py-4">
                                             <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-sm">
                                                 <div>
                                                     <span className="text-gray-400 block text-[10px] uppercase font-bold tracking-widest">Catégorie</span>
-                                                    <span className="text-gray-700 font-medium">{equipment.category}</span>
+                                                    <span className="text-gray-700 font-medium">{categoryName}</span>
                                                 </div>
                                                 <div>
-                                                    <span className="text-gray-400 block text-[10px] uppercase font-bold tracking-widest">État</span>
-                                                    <span className="text-gray-700 font-medium">{equipment.condition}</span>
+                                                    <span className="text-gray-400 block text-[10px] uppercase font-bold tracking-widest">Quantité</span>
+                                                    <span className="text-gray-700 font-medium">{equipment.totalQuantity ?? '—'}</span>
                                                 </div>
-                                                {equipment.location && (
+                                                {equipment.serialNumber && (
                                                     <div className="col-span-2">
-                                                        <span className="text-gray-400 block text-[10px] uppercase font-bold tracking-widest">Localisation</span>
-                                                        <span className="text-gray-700 font-medium">{equipment.location}</span>
+                                                        <span className="text-gray-400 block text-[10px] uppercase font-bold tracking-widest">N° Série</span>
+                                                        <span className="text-gray-700 font-medium font-mono text-xs">{equipment.serialNumber}</span>
                                                     </div>
                                                 )}
                                             </div>
@@ -135,7 +146,7 @@ export default function Inventory() {
                                         <CardFooter className="pt-0 border-none">
                                             <Link to={`/inventory/${equipment.id}`} className="w-full">
                                                 <Button variant="secondary" className="w-full font-bold group-hover:bg-primary-50 group-hover:text-primary-600 border-none">
-                                                    Détails & Emprunter
+                                                    Détails &amp; Emprunter
                                                 </Button>
                                             </Link>
                                         </CardFooter>
@@ -155,7 +166,7 @@ export default function Inventory() {
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 mb-2">Aucun matériel trouvé</h3>
                         <p className="text-gray-500 max-w-xs mx-auto">Essayez de modifier vos filtres ou de réinitialiser votre recherche.</p>
-                        <Button variant="ghost" className="mt-6 text-primary-600" onClick={() => { setSearch(''); setStatusFilter('ALL'); }}>
+                        <Button variant="ghost" className="mt-6 text-primary-600" onClick={() => { setSearch(''); setCategoryFilter('ALL'); }}>
                             Réinitialiser les filtres
                         </Button>
                     </motion.div>
