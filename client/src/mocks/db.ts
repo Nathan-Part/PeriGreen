@@ -1,6 +1,6 @@
 import type { Equipment, User, Loan } from '../types';
 
-export let mockUsers: User[] = [
+export const mockUsers: User[] = [
     {
         id: 'u1',
         firstName: 'Admin',
@@ -17,7 +17,7 @@ export let mockUsers: User[] = [
     }
 ];
 
-export let mockEquipment: Equipment[] = [
+export const mockEquipment: Equipment[] = [
     {
         id: 'e1',
         name: 'Ordinateur Portable Dell XPS 15',
@@ -110,7 +110,7 @@ export let mockEquipment: Equipment[] = [
     }
 ];
 
-export let mockLoans: Loan[] = [
+export const mockLoans: Loan[] = [
     {
         id: 'l1',
         equipmentId: 'e3',

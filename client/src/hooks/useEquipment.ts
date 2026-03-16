@@ -6,8 +6,7 @@ import {
   updateEquipment,
   deleteEquipment,
   getCategories,
-  type Equipment,
-  type Category
+  type Equipment
 } from '../services/api';
 
 export const useEquipments = () => {

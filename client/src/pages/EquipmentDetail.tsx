@@ -40,6 +40,7 @@ export default function EquipmentDetail() {
     const [isSuccess, setIsSuccess] = useState(false);
 
     const { register, handleSubmit, formState: { errors }, reset } = useForm<LoanFormData>({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         resolver: zodResolver(loanFormSchema) as any,
         defaultValues: {
             pickupDate: new Date().toISOString().split('T')[0],
@@ -57,6 +58,7 @@ export default function EquipmentDetail() {
             notes: data.notes || ''
         };
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         createLoan.mutate(apiData as any, {
             onSuccess: () => {
                 setIsSuccess(true);
@@ -98,8 +100,8 @@ export default function EquipmentDetail() {
                                     <Laptop size={80} className="text-gray-200" />
                                 )}
                                 <div className="absolute top-4 right-4">
-                                    {(equipment as any).etat ? (
-                                        ETAT_BADGE[(equipment as any).etat.toLowerCase()] ?? <Badge variant="default">{(equipment as any).etat}</Badge>
+                                    {equipment.etat ? (
+                                        ETAT_BADGE[equipment.etat.toLowerCase()] ?? <Badge variant="default">{equipment.etat}</Badge>
                                     ) : (
                                         <Badge variant="success" className="text-lg py-1 px-4">Disponible</Badge>
                                     )}
@@ -191,7 +193,7 @@ export default function EquipmentDetail() {
                                                 >
                                                     <option value="">Sélectionner...</option>
                                                     {users?.map(u => (
-                                                        <option key={u.id} value={u.id}>{(u as any).fullName || u.email}</option>
+                                                        <option key={u.id} value={u.id}>{u.fullName || u.email}</option>
                                                     ))}
                                                 </select>
                                                 {errors.borrowerId && <p className="text-xs text-red-500 flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.borrowerId.message}</p>}

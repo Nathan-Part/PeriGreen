@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { login, logout as apiLogout, getCurrentUser, setToken, removeToken } from '../services/api';
+import { login, logout as apiLogout, getCurrentUser, removeToken } from '../services/api';
 
 interface User {
   id: number;

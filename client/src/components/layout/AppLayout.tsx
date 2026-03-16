@@ -1,4 +1,3 @@
-import React from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Laptop, Archive, BarChart3, Menu, Bell, LogOut, Leaf } from 'lucide-react';
 import { cn } from '../../lib/utils';

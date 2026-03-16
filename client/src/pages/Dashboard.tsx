@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { useLoans } from '../hooks/useLoans';
 import { useEquipments } from '../hooks/useEquipment';
 import { Card, CardContent } from '../components/ui/Card';
@@ -7,12 +7,12 @@ import { Button } from '../components/ui/Button';
 import { Leaf, Zap, Clock, ArrowRight, Laptop, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const containerVariants = {
+const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: { y: 0, opacity: 1, transition: { duration: 0.5, ease: "easeOut" } }
 };

@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEquipments, useCategories } from '../hooks/useEquipment';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-import { Search, Filter, Laptop, Smartphone, Monitor, HardDrive, Package } from 'lucide-react';
+import { Search, Filter, Laptop, Smartphone, Monitor, HardDrive, Package, type LucideIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const CATEGORY_ICONS: Record<string, any> = {
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
     'Portable': Laptop,
     'Mobile': Smartphone,
     'Ecran': Monitor,
@@ -15,7 +15,7 @@ const CATEGORY_ICONS: Record<string, any> = {
     'Périphérique': Package,
 };
 
-const ETAT_BADGE: Record<string, JSX.Element> = {
+const ETAT_BADGE: Record<string, React.ReactElement> = {
     'bon': <Badge variant="success">Bon état</Badge>,
     'bon état': <Badge variant="success">Bon état</Badge>,
     'moyen': <Badge variant="warning">État moyen</Badge>,

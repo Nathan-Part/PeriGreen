@@ -111,6 +111,8 @@ export interface Equipment {
   model: string;
   serialNumber: string;
   etat: string;
+  status?: string;
+  condition?: string;
   totalQuantity: number;
   imageUrl: string;
   category: {
@@ -195,6 +197,7 @@ export const createLoan = async (data: {
   reservationId: number;
   equipmentId: number;
   borrowerId: number;
+  notes?: string;
 }) => {
   return fetchApi<Loan>('/api/loans', {
     method: 'POST',
