@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEquipments } from '../hooks/useEquipment';
+import { useEquipments, useCategories } from '../hooks/useEquipment';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
@@ -24,14 +24,12 @@ const ETAT_BADGE: Record<string, JSX.Element> = {
 };
 
 export default function Inventory() {
-    const { data: equipments, isLoading } = useEquipments();
+    const { data: equipments, isLoading: isEquipLoading } = useEquipments();
+    const { data: apiCategories, isLoading: isCatsLoading } = useCategories();
     const [search, setSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
 
-    // Collect unique category names for filter dropdown
-    const categories = equipments
-        ? [...new Set(equipments.map(eq => (typeof eq.category === 'object' ? eq.category.name : eq.category)))]
-        : [];
+    const categories = apiCategories ?? [];
 
     const filteredEquipments = equipments?.filter(eq => {
         const categoryName = typeof eq.category === 'object' ? eq.category.name : eq.category;
@@ -43,6 +41,8 @@ export default function Inventory() {
         const matchesCategory = categoryFilter === 'ALL' || categoryName === categoryFilter;
         return matchesSearch && matchesCategory;
     });
+
+    const isLoading = isEquipLoading || isCatsLoading;
 
     const getEtatBadge = (etat: string) => {
         const lower = (etat ?? '').toLowerCase();
@@ -76,7 +76,7 @@ export default function Inventory() {
                     >
                         <option value="ALL">Toutes les catégories</option>
                         {categories.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
+                            <option key={cat.id} value={cat.name}>{cat.name}</option>
                         ))}
                     </select>
                 </div>
