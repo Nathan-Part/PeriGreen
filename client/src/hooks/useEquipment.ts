@@ -5,9 +5,7 @@ import {
   createEquipment,
   updateEquipment,
   deleteEquipment,
-  getCategories,
-  type Equipment,
-  type Category
+  getCategories
 } from '../services/api';
 
 export const useEquipments = () => {
@@ -36,7 +34,7 @@ export const useCreateEquipment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: Partial<Equipment>) => createEquipment(data),
+    mutationFn: (data: Parameters<typeof createEquipment>[0]) => createEquipment(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['equipments'] });
     },
@@ -47,7 +45,7 @@ export const useUpdateEquipment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Equipment> }) =>
+    mutationFn: ({ id, data }: { id: number; data: Parameters<typeof updateEquipment>[1] }) =>
       updateEquipment(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['equipments'] });

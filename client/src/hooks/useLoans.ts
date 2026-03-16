@@ -8,9 +8,7 @@ import {
   getReservations,
   createReservation,
   updateReservation,
-  deleteReservation,
-  type Loan,
-  type Reservation
+  deleteReservation
 } from '../services/api';
 
 // Loans
@@ -45,7 +43,7 @@ export const useUpdateLoan = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Loan> }) =>
+    mutationFn: ({ id, data }: { id: number; data: Parameters<typeof updateLoan>[1] }) =>
       updateLoan(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['loans'] });
@@ -99,7 +97,7 @@ export const useUpdateReservation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Reservation> }) =>
+    mutationFn: ({ id, data }: { id: number; data: Parameters<typeof updateReservation>[1] }) =>
       updateReservation(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['reservations'] });
