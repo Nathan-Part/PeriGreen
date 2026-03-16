@@ -9,7 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/equipments', name: 'api_equipments_')]
 class EquipmentController extends AbstractController
@@ -101,6 +101,14 @@ class EquipmentController extends AbstractController
 
     private function format(Equipment $e): array
     {
+        $activeLoans = $e->getLoans()->filter(fn($l) => in_array($l->getStatus()?->value, ['EN_COURS', 'EN_RETARD']));
+        $status = $activeLoans->count() > 0 ? 'IN_USE' : 'AVAILABLE';
+        
+        // Si l'état contient "maintenance", on met le status à MAINTENANCE
+        if (str_contains(strtolower($e->getEtat() ?? ''), 'maintenance')) {
+            $status = 'MAINTENANCE';
+        }
+
         return [
             'id'            => $e->getId(),
             'name'          => $e->getName(),
@@ -109,6 +117,8 @@ class EquipmentController extends AbstractController
             'model'         => $e->getModel(),
             'serialNumber'  => $e->getSerialNumber(),
             'etat'          => $e->getEtat(),
+            'condition'     => $e->getEtat(), 
+            'status'        => $status,       
             'totalQuantity' => $e->getTotalQuantity(),
             'imageUrl'      => $e->getImageUrl(),
             'category'      => [

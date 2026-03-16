@@ -12,7 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/loans', name: 'api_loans_')]
 class LoanController extends AbstractController
@@ -67,7 +67,10 @@ class LoanController extends AbstractController
         $loan->setReturnDate(isset($data['returnDate']) ? new \DateTimeImmutable($data['returnDate']) : null);
         $loan->setStatus($status);
         $loan->setQuantity((int) $data['quantity']);
-if (isset($data['returnNote'])) $loan->setReturnNote($data['returnNote']);        $loan->setEquipment($equipment);
+        if (isset($data['returnNote'])) {
+            $loan->setReturnNote($data['returnNote']);
+        }
+        $loan->setEquipment($equipment);
         $loan->setBorrower($borrower);
         $loan->setReservation($reservation);
 
