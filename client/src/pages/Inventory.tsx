@@ -1,166 +1,148 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useEquipments } from '../hooks/useEquipment';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/Card';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Filter, PackageSearch, Search } from 'lucide-react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-import { Search, Filter, Laptop, Smartphone, Monitor, HardDrive, Package } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import type { EquipmentStatus } from '../types';
-
-const CATEGORY_ICONS: Record<string, any> = {
-    'Portable': Laptop,
-    'Mobile': Smartphone,
-    'Ecran': Monitor,
-    'Stockage': HardDrive,
-    'Périphérique': Package,
-};
+import { useEquipments } from '../hooks/useEquipment';
+import { isAdminUser, useAuth } from '../hooks/useAuth';
 
 export default function Inventory() {
-    const { data: equipments, isLoading } = useEquipments();
-    const [search, setSearch] = useState('');
-    const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const { user } = useAuth();
+  const { data: equipments = [], isLoading } = useEquipments();
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('ALL');
 
-    const filteredEquipments = equipments?.filter(eq => {
-        const matchesSearch = eq.name.toLowerCase().includes(search.toLowerCase()) ||
-            eq.reference.toLowerCase().includes(search.toLowerCase());
-        const matchesStatus = statusFilter === 'ALL' || eq.status === statusFilter;
-        return matchesSearch && matchesStatus;
-    });
+  const categories = Array.from(new Set(equipments.map((equipment) => equipment.category.name)));
+  const filteredEquipments = equipments.filter((equipment) => {
+    const normalizedSearch = search.toLowerCase();
+    const matchesSearch = [equipment.name, equipment.brand, equipment.model, equipment.serialNumber]
+      .join(' ')
+      .toLowerCase()
+      .includes(normalizedSearch);
+    const matchesCategory = category === 'ALL' || equipment.category.name === category;
 
-    const getStatusBadge = (status: EquipmentStatus) => {
-        switch (status) {
-            case 'AVAILABLE': return <Badge variant="success">Disponible</Badge>;
-            case 'IN_USE': return <Badge variant="info">En cours d'emprunt</Badge>;
-            case 'MAINTENANCE': return <Badge variant="warning">En maintenance</Badge>;
-            case 'RETIRED': return <Badge variant="default">Ancien</Badge>;
-            case 'LOST': return <Badge variant="danger">Perdu</Badge>;
-            default: return <Badge variant="default">{status}</Badge>;
-        }
-    };
+    return matchesSearch && matchesCategory;
+  });
 
-    return (
-        <div className="space-y-8">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">Inventaire du matériel</h1>
-                    <p className="text-gray-500 mt-2">Consultez et gérez l'ensemble du parc informatique de l'établissement.</p>
-                </div>
+  const isAdmin = isAdminUser(user);
 
-                <div className="flex flex-wrap items-center gap-3">
-                    <div className="relative group w-full md:w-80">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Rechercher par nom, référence..."
-                            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all font-medium placeholder:text-gray-400"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </div>
-
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="bg-white border border-gray-200 rounded-xl px-4 py-2 font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 cursor-pointer"
-                    >
-                        <option value="ALL">Tous les statuts</option>
-                        <option value="AVAILABLE">Disponible</option>
-                        <option value="IN_USE">En cours d'emprunt</option>
-                        <option value="MAINTENANCE">En maintenance</option>
-                    </select>
-                </div>
-            </div>
-
-            <AnimatePresence mode="popLayout">
-                {isLoading ? (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                    >
-                        {[...Array(6)].map((_, i) => (
-                            <div key={i} className="h-[280px] bg-gray-100 rounded-2xl animate-pulse" />
-                        ))}
-                    </motion.div>
-                ) : filteredEquipments && filteredEquipments.length > 0 ? (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                    >
-                        {filteredEquipments.map((equipment) => {
-                            const Icon = CATEGORY_ICONS[equipment.category] || Package;
-                            return (
-                                <motion.div
-                                    key={equipment.id}
-                                    layout
-                                    initial={{ scale: 0.9, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    transition={{ duration: 0.2 }}
-                                    whileHover={{ y: -5 }}
-                                >
-                                    <Card className="h-full flex flex-col hover:shadow-lg transition-all border-none shadow-sm bg-white overflow-hidden group">
-                                        <CardHeader className="bg-gray-50/50 pb-4">
-                                            <div className="flex items-start justify-between">
-                                                <div className="p-2.5 bg-white border border-gray-100 rounded-xl text-primary-600 group-hover:bg-primary-500 group-hover:text-white transition-colors">
-                                                    <Icon size={20} />
-                                                </div>
-                                                {getStatusBadge(equipment.status)}
-                                            </div>
-                                            <div className="mt-4">
-                                                <CardTitle className="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors line-clamp-1">{equipment.name}</CardTitle>
-                                                <p className="text-xs font-mono text-gray-400 mt-1">{equipment.reference}</p>
-                                            </div>
-                                        </CardHeader>
-                                        <CardContent className="flex-1 py-4">
-                                            <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-sm">
-                                                <div>
-                                                    <span className="text-gray-400 block text-[10px] uppercase font-bold tracking-widest">Catégorie</span>
-                                                    <span className="text-gray-700 font-medium">{equipment.category}</span>
-                                                </div>
-                                                <div>
-                                                    <span className="text-gray-400 block text-[10px] uppercase font-bold tracking-widest">État</span>
-                                                    <span className="text-gray-700 font-medium">{equipment.condition}</span>
-                                                </div>
-                                                {equipment.location && (
-                                                    <div className="col-span-2">
-                                                        <span className="text-gray-400 block text-[10px] uppercase font-bold tracking-widest">Localisation</span>
-                                                        <span className="text-gray-700 font-medium">{equipment.location}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </CardContent>
-                                        <CardFooter className="pt-0 border-none">
-                                            <Link to={`/inventory/${equipment.id}`} className="w-full">
-                                                <Button variant="secondary" className="w-full font-bold group-hover:bg-primary-50 group-hover:text-primary-600 border-none">
-                                                    Détails & Emprunter
-                                                </Button>
-                                            </Link>
-                                        </CardFooter>
-                                    </Card>
-                                </motion.div>
-                            );
-                        })}
-                    </motion.div>
-                ) : (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-white border border-dashed border-gray-200 rounded-3xl p-20 text-center"
-                    >
-                        <div className="mx-auto w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                            <Filter className="text-gray-300" size={32} />
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">Aucun matériel trouvé</h3>
-                        <p className="text-gray-500 max-w-xs mx-auto">Essayez de modifier vos filtres ou de réinitialiser votre recherche.</p>
-                        <Button variant="ghost" className="mt-6 text-primary-600" onClick={() => { setSearch(''); setStatusFilter('ALL'); }}>
-                            Réinitialiser les filtres
-                        </Button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+            {isAdmin ? 'Inventaire du parc' : 'Catalogue des equipements'}
+          </h1>
+          <p className="mt-2 text-gray-500">
+            {isAdmin
+              ? 'Vision globale du parc pour le suivi et la supervision.'
+              : 'Consultez les equipements disponibles avant de faire une demande.'}
+          </p>
         </div>
-    );
+
+        <div className="flex flex-col gap-3 md:flex-row">
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Nom, marque, modele, numero de serie..."
+              className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm outline-none transition focus:border-perigreen-500 focus:ring-2 focus:ring-perigreen-100"
+            />
+          </div>
+
+          <select
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+            className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-perigreen-500 focus:ring-2 focus:ring-perigreen-100"
+          >
+            <option value="ALL">Toutes les categories</option>
+            {categories.map((item) => (
+              <option key={item} value={item}>{item}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="h-64 rounded-3xl bg-gray-100 animate-pulse" />
+          ))}
+        </div>
+      ) : filteredEquipments.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-gray-200 bg-white p-16 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-50">
+            <Filter className="text-gray-300" size={30} />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900">Aucun equipement trouve</h3>
+          <p className="mx-auto mt-2 max-w-md text-sm text-gray-500">
+            Ajustez vos filtres ou revenez plus tard, le catalogue pourra evoluer en fonction des disponibilites.
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {filteredEquipments.map((equipment, index) => (
+            <motion.div
+              key={equipment.id}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.04 }}
+            >
+              <Card className="h-full border-none shadow-md">
+                <CardHeader className="space-y-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <Badge variant="info">{equipment.category.name}</Badge>
+                    <Badge variant={equipment.totalQuantity > 0 ? 'success' : 'warning'}>
+                      {equipment.totalQuantity > 0 ? `${equipment.totalQuantity} dispo` : 'Rupture'}
+                    </Badge>
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl">{equipment.name}</CardTitle>
+                    <p className="mt-2 text-sm text-gray-500">{equipment.brand} · {equipment.model}</p>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="rounded-2xl bg-gray-50 p-4">
+                    <p className="text-sm text-gray-700">{equipment.description}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-400">Etat</p>
+                      <p className="font-medium text-gray-900">{equipment.etat}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400">Serie</p>
+                      <p className="font-medium text-gray-900">{equipment.serialNumber}</p>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Link to={`${isAdmin ? '/admin' : '/dashboard'}/inventory/${equipment.id}`} className="w-full">
+                    <Button className="w-full">
+                      {isAdmin ? 'Voir la fiche admin' : 'Voir le detail'}
+                    </Button>
+                  </Link>
+                </CardFooter>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      <div className="rounded-3xl bg-slate-950 p-6 text-white">
+        <div className="flex items-center gap-3">
+          <PackageSearch size={22} />
+          <p className="font-semibold">
+            {isAdmin
+              ? 'Les actions de gestion lourdes doivent rester dans l espace admin.'
+              : 'La demande se fait depuis la fiche detail d un equipement.'}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
