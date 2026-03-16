@@ -1,22 +1,23 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { login, logout as apiLogout, getCurrentUser, setToken, removeToken } from '../services/api';
-
-interface User {
-  id: number;
-  email: string;
-  roles: string[];
-}
+import { getCurrentUser, login, logout as apiLogout, removeToken, type AuthUser } from '../services/api';
 
 interface AuthState {
-  user: User | null;
+  user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthUser>;
   logout: () => void;
   checkAuth: () => Promise<void>;
+  clearError: () => void;
 }
+
+export const isAdminUser = (user: AuthUser | null | undefined) =>
+  user?.roles.includes('ROLE_ADMIN') ?? false;
+
+export const getDefaultDashboardPath = (user: AuthUser | null | undefined) =>
+  isAdminUser(user) ? '/admin/dashboard' : '/dashboard';
 
 export const useAuth = create<AuthState>()(
   persist(
@@ -31,6 +32,7 @@ export const useAuth = create<AuthState>()(
         try {
           const user = await login(email, password);
           set({ user, isAuthenticated: true, isLoading: false });
+          return user;
         } catch (error) {
           set({ error: (error as Error).message, isLoading: false });
           throw error;
@@ -45,11 +47,11 @@ export const useAuth = create<AuthState>()(
       checkAuth: async () => {
         const token = localStorage.getItem('token');
         if (!token) {
-          set({ isAuthenticated: false, user: null });
+          set({ user: null, isAuthenticated: false, isLoading: false });
           return;
         }
 
-        set({ isLoading: true });
+        set({ isLoading: true, error: null });
         try {
           const user = await getCurrentUser();
           set({ user, isAuthenticated: true, isLoading: false });
@@ -58,10 +60,15 @@ export const useAuth = create<AuthState>()(
           set({ user: null, isAuthenticated: false, isLoading: false });
         }
       },
+
+      clearError: () => set({ error: null }),
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
   )
 );
