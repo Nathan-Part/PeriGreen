@@ -1,0 +1,43 @@
+# --- IDE & OS ---
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# --- Logs ---
+*.log
+npm-debug.log*
+
+# --- Client (React/Vite) ---
+client/node_modules/
+client/dist/
+client/*.local
+
+# --- Server (Symfony) ---
+server/vendor/
+server/var/
+server/public/bundles/
+# public/assets contient le cache d'AssetMapper, on l'ignore
+server/public/assets/
+server/assets/vendor/
+server/config/jwt/*.pem
+server/phpunit.xml
+server/.phpunit.result.cache
+server/.phpunit.cache/
+server/coverage/
+server/composer.phar
+
+# --- Environment & Secrets ---
+.env
+.env.local
+.env.*.local
+client/.env
+client/.env.local
+server/.env
+server/.env.local
+server/.env.dev
+server/.env.test
+server/.env.dev.local
+server/.env.test.local

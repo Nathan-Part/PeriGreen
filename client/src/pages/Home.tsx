@@ -7,15 +7,10 @@ import { Mission } from '../components/home/Mission';
 import { Processus } from '../components/home/Processus';
 import { Team } from '../components/home/Team';
 import { Testimonials } from '../components/home/Testimonials';
-import { PublicFooter } from '../components/layout/PublicFooter';
-import { PublicNavbar } from '../components/layout/PublicNavbar';
 
 export default function Home() {
     return (
-        <div id="top" className="min-h-screen bg-[#e6f5ef] text-[#0f3d2e]">
-            <PublicNavbar />
-
-            <main>
+        <div id="top">
                 {/* Section Hero */}
                 <Hero />
 
@@ -42,9 +37,6 @@ export default function Home() {
 
                 {/* Section Équipe projet */}
                 <Team />
-            </main>
-
-            <PublicFooter />
         </div>
     );
 }

@@ -164,9 +164,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     public function getRole(): ?string
-    {
+{
+    // Si c'est déjà une string, on la retourne directement
+    if (is_string($this->role)) {
         return $this->role;
     }
+    
+    // Si c'est un objet enum, on retourne sa valeur
+    return $this->role?->value;
+}
 
     public function setRole(Role $role): static
     {
