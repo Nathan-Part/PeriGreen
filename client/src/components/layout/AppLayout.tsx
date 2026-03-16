@@ -1,6 +1,6 @@
-import React from 'react';
+
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Laptop, Archive, BarChart3, Menu, Bell, LogOut, Leaf } from 'lucide-react';
+import { LayoutDashboard, Laptop, Archive, BarChart3, Menu, Bell, LogOut} from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
@@ -38,8 +38,8 @@ export const AppLayout = () => {
             >
                 <div className="h-16 flex items-center px-6 border-b border-border">
                     <Link to="/dashboard" className="flex items-center gap-2 group">
-                        <div className="h-8 w-8 bg-perigreen-600 text-white rounded-lg flex items-center justify-center group-hover:bg-perigreen-700 transition-colors">
-                            <Leaf size={18} strokeWidth={2.5} />
+                        <div className="h-8 w-8 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center group-hover:bg-primary-500 group-hover:text-white transition-colors">
+                            <Laptop size={18} strokeWidth={2.5} />
                         </div>
                         <span className="text-xl font-bold tracking-tight text-perigreen-600 group-hover:text-perigreen-700 transition-colors">
                             Peri<span className="text-gray-900">Green</span>
