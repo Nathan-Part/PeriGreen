@@ -122,16 +122,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
-     */
-    public function __serialize(): array
-    {
-        $data = (array) $this;
-        $data["\0" . self::class . "\0password"] = hash('crc32c', $this->password);
-
-        return $data;
-    }
 
     #[\Deprecated]
     public function eraseCredentials(): void
@@ -164,9 +154,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     public function getRole(): ?string
-    {
+{
+    // Si c'est déjà une string, on la retourne directement
+    if (is_string($this->role)) {
         return $this->role;
     }
+    
+    // Si c'est un objet enum, on retourne sa valeur
+    return $this->role?->value;
+}
 
     public function setRole(Role $role): static
     {
