@@ -1,27 +1,25 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEquipment } from '../hooks/useEquipment';
 import { useUsers } from '../hooks/useUsers';
-import { useCreateLoan } from '../hooks/useLoans';
+import { useCreateReservation } from '../hooks/useLoans';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
-import { ArrowLeft, Calendar, User as UserIcon, FileText, CheckCircle2, AlertCircle, Laptop, Hash, Tag } from 'lucide-react';
+import { ArrowLeft, ClipboardList, User as UserIcon, FileText, CheckCircle2, AlertCircle, Laptop, Hash, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 
-// Adjusted schema to match real API fields
-const loanFormSchema = z.object({
-    borrowerId: z.coerce.number().min(1, "L'emprunteur est requis"),
-    pickupDate: z.string().min(1, "La date de début est requise"),
-    dueDate: z.string().min(1, "La date de fin est requise"),
+// Schéma pour créer une réservation admin (au nom d'un utilisateur)
+const reservationFormSchema = z.object({
+    requesterId: z.coerce.number().min(1, "L'utilisateur est requis"),
     quantity: z.coerce.number().min(1, "La quantité doit être au moins 1"),
-    notes: z.string().optional(),
+    status: z.string().optional(),
 });
 
-type LoanFormData = z.infer<typeof loanFormSchema>;
+type ReservationFormData = z.infer<typeof reservationFormSchema>;
 
 const ETAT_BADGE: Record<string, React.ReactNode> = {
     'bon': <Badge variant="success">Bon état</Badge>,
@@ -36,34 +34,36 @@ export default function EquipmentDetail() {
     const navigate = useNavigate();
     const { data: equipment, isLoading: isEquipLoading } = useEquipment(id!);
     const { data: users } = useUsers();
-    const createLoan = useCreateLoan();
+    const createReservation = useCreateReservation();
     const [isSuccess, setIsSuccess] = useState(false);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-    const { register, handleSubmit, formState: { errors }, reset } = useForm<LoanFormData>({
+    const { register, handleSubmit, formState: { errors }, reset } = useForm<ReservationFormData>({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        resolver: zodResolver(loanFormSchema) as any,
+        resolver: zodResolver(reservationFormSchema) as any,
         defaultValues: {
-            pickupDate: new Date().toISOString().split('T')[0],
-            quantity: 1
+            quantity: 1,
+            status: 'EN_ATTENTE',
         }
     });
 
-    const onSubmit = (data: LoanFormData) => {
-        // Adapt data to match CreateLoan API signature
+    const onSubmit = (data: ReservationFormData) => {
+        setErrorMsg(null);
         const apiData = {
-            ...data,
             equipmentId: Number(id),
-            status: 'ACTIVE',
-            reservationId: 0, // Placeholder if no reservation exists
-            notes: data.notes || ''
+            requesterId: data.requesterId,
+            quantity: data.quantity,
+            status: data.status || 'EN_ATTENTE',
         };
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        createLoan.mutate(apiData as any, {
+        createReservation.mutate(apiData, {
             onSuccess: () => {
                 setIsSuccess(true);
                 reset();
                 setTimeout(() => setIsSuccess(false), 5000);
+            },
+            onError: (err: Error) => {
+                setErrorMsg(err.message || 'Une erreur est survenue');
             }
         });
     };
@@ -73,8 +73,6 @@ export default function EquipmentDetail() {
 
     const categoryName = typeof equipment.category === 'object' ? equipment.category.name : equipment.category;
 
-    // In this version, we assume it's available if totalQuantity > 0 or if we don't have a specific status
-    const isAvailable = true;
 
     return (
         <div className="max-w-5xl mx-auto space-y-8">
@@ -157,11 +155,11 @@ export default function EquipmentDetail() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
                     >
-                        <Card className={isAvailable ? 'border-primary-100 shadow-xl ring-1 ring-primary-500/5 bg-white' : 'bg-gray-50 opacity-80'}>
+                        <Card className="border-primary-100 shadow-xl ring-1 ring-primary-500/5 bg-white">
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
-                                    <Calendar size={20} className="text-primary-600" />
-                                    Nouveau Prêt
+                                    <ClipboardList size={20} className="text-primary-600" />
+                                    Nouvelle Réservation
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -176,53 +174,33 @@ export default function EquipmentDetail() {
                                             <div className="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto">
                                                 <CheckCircle2 size={24} />
                                             </div>
-                                            <h4 className="font-bold">Emprunt enregistré</h4>
-                                            <p className="text-sm">La demande a été traitée avec succès.</p>
-                                            <Button variant="ghost" className="text-green-700" onClick={() => setIsSuccess(false)}>Nouveau prêt</Button>
+                                            <h4 className="font-bold">Réservation créée</h4>
+                                            <p className="text-sm">La réservation a été enregistrée avec succès.</p>
+                                            <Button variant="ghost" className="text-green-700" onClick={() => setIsSuccess(false)}>Nouvelle réservation</Button>
                                         </motion.div>
                                     ) : (
                                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                                            {errorMsg && (
+                                                <div className="bg-red-50 text-red-600 text-sm rounded-lg p-3 flex items-center gap-2">
+                                                    <AlertCircle size={14} /> {errorMsg}
+                                                </div>
+                                            )}
+
                                             <div className="space-y-1.5">
                                                 <label className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1.5">
-                                                    <UserIcon size={12} /> Emprunteur
+                                                    <UserIcon size={12} /> Utilisateur
                                                 </label>
                                                 <select
-                                                    {...register('borrowerId')}
+                                                    {...register('requesterId')}
                                                     className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
-                                                    disabled={!isAvailable || createLoan.isPending}
+                                                    disabled={createReservation.isPending}
                                                 >
-                                                    <option value="">Sélectionner...</option>
+                                                    <option value="">Sélectionner un utilisateur...</option>
                                                     {users?.map(u => (
                                                         <option key={u.id} value={u.id}>{u.fullName || u.email}</option>
                                                     ))}
                                                 </select>
-                                                {errors.borrowerId && <p className="text-xs text-red-500 flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.borrowerId.message}</p>}
-                                            </div>
-
-                                            <div className="space-y-1.5">
-                                                <label className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1.5">
-                                                    <Calendar size={12} /> Date de début
-                                                </label>
-                                                <input
-                                                    type="date"
-                                                    {...register('pickupDate')}
-                                                    className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
-                                                    disabled={!isAvailable || createLoan.isPending}
-                                                />
-                                                {errors.pickupDate && <p className="text-xs text-red-500 flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.pickupDate.message}</p>}
-                                            </div>
-
-                                            <div className="space-y-1.5">
-                                                <label className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1.5">
-                                                    <Calendar size={12} /> Fin prévue
-                                                </label>
-                                                <input
-                                                    type="date"
-                                                    {...register('dueDate')}
-                                                    className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
-                                                    disabled={!isAvailable || createLoan.isPending}
-                                                />
-                                                {errors.dueDate && <p className="text-xs text-red-500 flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.dueDate.message}</p>}
+                                                {errors.requesterId && <p className="text-xs text-red-500 flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.requesterId.message}</p>}
                                             </div>
 
                                             <div className="space-y-1.5">
@@ -231,21 +209,36 @@ export default function EquipmentDetail() {
                                                 </label>
                                                 <input
                                                     type="number"
+                                                    min={1}
                                                     {...register('quantity')}
                                                     className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
-                                                    disabled={!isAvailable || createLoan.isPending}
+                                                    disabled={createReservation.isPending}
                                                 />
                                                 {errors.quantity && <p className="text-xs text-red-500 flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.quantity.message}</p>}
+                                            </div>
+
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1.5">
+                                                    <ClipboardList size={12} /> Statut initial
+                                                </label>
+                                                <select
+                                                    {...register('status')}
+                                                    className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                                                    disabled={createReservation.isPending}
+                                                >
+                                                    <option value="EN_ATTENTE">En attente</option>
+                                                    <option value="VALIDEE">Validée directement</option>
+                                                </select>
                                             </div>
 
                                             <Button
                                                 type="submit"
                                                 variant="primary"
                                                 className="w-full py-6 text-lg shadow-lg shadow-primary-500/20 mt-4 bg-primary-600 text-white hover:bg-primary-700"
-                                                disabled={!isAvailable || createLoan.isPending}
-                                                isLoading={createLoan.isPending}
+                                                disabled={createReservation.isPending}
+                                                isLoading={createReservation.isPending}
                                             >
-                                                {isAvailable ? 'Confirmer l\'emprunt' : 'Indisponible'}
+                                                Créer la réservation
                                             </Button>
                                         </form>
                                     )}
