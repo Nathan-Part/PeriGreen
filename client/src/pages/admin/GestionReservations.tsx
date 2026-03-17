@@ -3,17 +3,17 @@ import { CheckCircle2, XCircle, ClipboardList, MessageSquare } from 'lucide-reac
 import { useReservations } from '../../hooks/useReservations';
 
 const statutConfig: Record<string, { label: string; color: string }> = {
-  EN_ATTENTE: { label: 'En attente', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-  VALIDEE:    { label: 'Validée',    color: 'bg-green-50  text-green-700  border-green-200' },
-  REFUSEE:    { label: 'Refusée',    color: 'bg-red-50    text-red-700    border-red-200' },
-  ANNULEE:    { label: 'Annulée',    color: 'bg-gray-50   text-gray-600   border-gray-200' },
-  EXPIREE:    { label: 'Expirée',    color: 'bg-orange-50 text-orange-700 border-orange-200' },
+  EN_ATTENTE: { label: 'En attente', color: 'badge-warning' },
+  VALIDEE:    { label: 'Validée',    color: 'badge-success' },
+  REFUSEE:    { label: 'Refusée',    color: 'badge-danger' },
+  ANNULEE:    { label: 'Annulée',    color: 'badge-default' },
+  EXPIREE:    { label: 'Expirée',    color: 'badge-warning' },
 };
 
 function StatutBadge({ status }: { status: string }) {
-  const cfg = statutConfig[status] ?? { label: status, color: 'bg-gray-50 text-gray-600 border-gray-200' };
+  const cfg = statutConfig[status] ?? { label: status, color: 'badge-default' };
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${cfg.color}`}>
+    <span className={cfg.color}>
       {cfg.label}
     </span>
   );
@@ -60,7 +60,7 @@ export default function GestionReservations() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="pg-card">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>

@@ -5,18 +5,18 @@ import { useAuth } from '../../hooks/useAuth';
 import { useReservations } from '../../hooks/useReservations';
 
 const statutConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  EN_ATTENTE: { label: 'En attente',  color: 'bg-yellow-50 text-yellow-700 border-yellow-200',  icon: <Hourglass size={13} /> },
-  VALIDEE:    { label: 'Validée',     color: 'bg-green-50  text-green-700  border-green-200',   icon: <CheckCircle2 size={13} /> },
-  REFUSEE:    { label: 'Refusée',     color: 'bg-red-50    text-red-700    border-red-200',     icon: <XCircle size={13} /> },
-  ANNULEE:    { label: 'Annulée',     color: 'bg-gray-50   text-gray-600   border-gray-200',    icon: <XCircle size={13} /> },
-  EXPIREE:    { label: 'Expirée',     color: 'bg-orange-50 text-orange-700 border-orange-200',  icon: <Clock size={13} /> },
+  EN_ATTENTE: { label: 'En attente',  color: 'badge-warning',  icon: <Hourglass size={13} /> },
+  VALIDEE:    { label: 'Validée',     color: 'badge-success',   icon: <CheckCircle2 size={13} /> },
+  REFUSEE:    { label: 'Refusée',     color: 'badge-danger',     icon: <XCircle size={13} /> },
+  ANNULEE:    { label: 'Annulée',     color: 'badge-default',    icon: <XCircle size={13} /> },
+  EXPIREE:    { label: 'Expirée',     color: 'badge-warning',  icon: <Clock size={13} /> },
 };
 
 function StatutBadge({ status }: { status: string }) {
-  const cfg = statutConfig[status] ?? { label: status, color: 'bg-gray-50 text-gray-600 border-gray-200', icon: null };
+  const cfg = statutConfig[status] ?? { label: status, color: 'badge-default', icon: null };
   return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${cfg.color}`}>
-      {cfg.icon}{cfg.label}
+    <span className={cfg.color}>
+      {cfg.icon} {cfg.label}
     </span>
   );
 }
@@ -39,7 +39,7 @@ export default function MesReservations() {
         </div>
         <Link
           to="/espace/reservations/nouvelle"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-sm"
+          className="btn-primary"
         >
           <PlusCircle size={16} />
           Nouvelle réservation
@@ -47,7 +47,7 @@ export default function MesReservations() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="pg-card">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>

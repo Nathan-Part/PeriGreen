@@ -5,18 +5,18 @@ import { useAuth } from '../../hooks/useAuth';
 import { useReservations } from '../../hooks/useReservations';
 
 const statutConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  EN_ATTENTE: { label: 'En attente',  color: 'bg-yellow-50 text-yellow-700 border-yellow-200',  icon: <Hourglass size={14} /> },
-  VALIDEE:    { label: 'Validée',     color: 'bg-green-50  text-green-700  border-green-200',   icon: <CheckCircle2 size={14} /> },
-  REFUSEE:    { label: 'Refusée',     color: 'bg-red-50    text-red-700    border-red-200',     icon: <XCircle size={14} /> },
-  ANNULEE:    { label: 'Annulée',     color: 'bg-gray-50   text-gray-600   border-gray-200',    icon: <XCircle size={14} /> },
-  EXPIREE:    { label: 'Expirée',     color: 'bg-orange-50 text-orange-700 border-orange-200',  icon: <Clock size={14} /> },
+  EN_ATTENTE: { label: 'En attente',  color: 'badge-warning',  icon: <Hourglass size={14} /> },
+  VALIDEE:    { label: 'Validée',     color: 'badge-success',  icon: <CheckCircle2 size={14} /> },
+  REFUSEE:    { label: 'Refusée',     color: 'badge-danger',   icon: <XCircle size={14} /> },
+  ANNULEE:    { label: 'Annulée',     color: 'badge-default',  icon: <XCircle size={14} /> },
+  EXPIREE:    { label: 'Expirée',     color: 'badge-warning',  icon: <Clock size={14} /> },
 };
 
 function StatutBadge({ status }: { status: string }) {
-  const cfg = statutConfig[status] ?? { label: status, color: 'bg-gray-50 text-gray-600 border-gray-200', icon: null };
+  const cfg = statutConfig[status] ?? { label: status, color: 'badge-default', icon: null };
   return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${cfg.color}`}>
-      {cfg.icon}{cfg.label}
+    <span className={cfg.color}>
+      {cfg.icon} {cfg.label}
     </span>
   );
 }
@@ -45,7 +45,7 @@ export default function TableauDeBordUser() {
         </div>
         <Link
           to="/espace/reservations/nouvelle"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-sm"
+          className="btn-primary"
         >
           <PlusCircle size={16} />
           Nouvelle réservation
@@ -59,7 +59,7 @@ export default function TableauDeBordUser() {
           { label: 'En attente',      value: enAttente,           icon: Hourglass,     color: 'text-yellow-600 bg-yellow-50' },
           { label: 'Validées',        value: validees,            icon: CheckCircle2,  color: 'text-blue-600 bg-blue-50' },
         ].map((kpi) => (
-          <div key={kpi.label} className="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4 shadow-sm">
+          <div key={kpi.label} className="pg-card p-5 flex items-center gap-4">
             <div className={`p-3 rounded-xl ${kpi.color}`}>
               <kpi.icon size={20} />
             </div>
@@ -72,7 +72,7 @@ export default function TableauDeBordUser() {
       </div>
 
       {/* Dernières réservations */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="pg-card">
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <h2 className="font-semibold text-gray-800 flex items-center gap-2">
             <CalendarCheck size={17} className="text-green-500" />

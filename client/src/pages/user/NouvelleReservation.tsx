@@ -67,7 +67,7 @@ export default function NouvelleReservation() {
       {/* Formulaire */}
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5"
+        className="pg-card p-6 space-y-5"
       >
         {/* Équipement */}
         <div>
@@ -125,7 +125,7 @@ export default function NouvelleReservation() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors disabled:opacity-60"
+          className="btn-primary w-full py-3"
         >
           {isLoading ? (
             <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />

@@ -1,0 +1,74 @@
+// client/src/styles/_mixins.scss
+@use 'variables' as var;
+
+// Bouton générique
+@mixin btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem; // text-sm
+  font-weight: 600;    // font-semibold
+  border-radius: var.$radius-md;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Bouton Primaire (Vert)
+@mixin btn-primary {
+  @include btn-base;
+  background-color: var.$color-primary;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background-color: var.$color-primary-dark;
+  }
+}
+
+// Bouton Secondaire (Outline)
+@mixin btn-secondary {
+  @include btn-base;
+  background-color: white;
+  color: var.$color-text-main;
+  border-color: var.$color-surface-border;
+
+  &:hover:not(:disabled) {
+    background-color: var.$color-surface;
+  }
+}
+
+// Card générique
+@mixin card {
+  background-color: var.$color-background;
+  border-radius: var.$radius-lg;
+  border: 1px solid var.$color-surface-border;
+  box-shadow: var.$shadow-sm;
+  overflow: hidden;
+
+  // Un petit effet hover
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  &:hover {
+    box-shadow: var.$shadow-md;
+  }
+}
+
+// Badge générique
+@mixin badge($bg-color, $text-color, $border-color: transparent) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.625rem; // py-0.5 px-2.5
+  border-radius: 9999px;      // rounded-full
+  font-size: 0.75rem;         // text-xs
+  font-weight: 600;           // font-semibold
+  background-color: $bg-color;
+  color: $text-color;
+  border: 1px solid $border-color;
+}
