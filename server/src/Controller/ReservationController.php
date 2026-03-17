@@ -8,10 +8,10 @@ use App\Repository\EquipmentRepository;
 use App\Repository\ReservationRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 #[Route('/api/reservations', name: 'api_reservations_')]
 class ReservationController extends AbstractController
@@ -19,12 +19,36 @@ class ReservationController extends AbstractController
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(ReservationRepository $repo): JsonResponse
     {
-        return $this->json(array_map(fn($r) => $this->format($r), $repo->findAll()));
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $reservations = $repo->findAll();
+        } else {
+            /** @var \App\Entity\User $user */
+            $user = $this->getUser();
+            $reservations = $repo->findBy(['requester' => $user]);
+        }
+        return $this->json(array_map(fn($r) => $this->format($r), $reservations));
+    }
+
+    #[Route('/me', name: 'my_reservations', methods: ['GET'])]
+    public function getMyReservations(ReservationRepository $repo): JsonResponse
+    {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json(['error' => 'Non authentifié'], 401);
+        }
+
+        $reservations = $repo->findBy(['requester' => $user]);
+        return $this->json(array_map(fn($r) => $this->format($r), $reservations));
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
     public function show(Reservation $reservation): JsonResponse
     {
+        $user = $this->getUser();
+        if (!$this->isGranted('ROLE_ADMIN') && $reservation->getRequester() !== $user) {
+            throw new AccessDeniedException('Vous ne pouvez voir que vos propres réservations.');
+        }
         return $this->json($this->format($reservation));
     }
 
@@ -37,23 +61,30 @@ class ReservationController extends AbstractController
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
-        $required = ['quantity', 'status', 'equipmentId', 'requesterId'];
+        // requesterId est implicite : c'est l'utilisateur connecté
+        $required = ['quantity', 'equipmentId'];
         foreach ($required as $field) {
             if (empty($data[$field])) {
                 return $this->json(['error' => "Champ manquant : $field"], 400);
             }
         }
 
-        $status = StatutReservation::tryFrom($data['status']);
-        if (!$status) {
-            return $this->json(['error' => 'Statut invalide. Valeurs: EN_ATTENTE, VALIDEE, REFUSEE, ANNULEE, EXPIREE'], 400);
+        // Le statut d'une création de la part d'un user est forcé EN_ATTENTE
+        // Si c'est un admin, il pourrait choisir, mais simplifions: on force EN_ATTENTE
+        $status = StatutReservation::EN_ATTENTE;
+        if (isset($data['status']) && $this->isGranted('ROLE_ADMIN')) {
+            $parsedStatus = StatutReservation::tryFrom($data['status']);
+            if ($parsedStatus) {
+                $status = $parsedStatus;
+            }
         }
 
         $equipment = $equipmentRepo->find($data['equipmentId']);
         if (!$equipment) return $this->json(['error' => 'Équipement introuvable'], 404);
 
-        $requester = $userRepo->find($data['requesterId']);
-        if (!$requester) return $this->json(['error' => 'Utilisateur introuvable'], 404);
+        /** @var \App\Entity\User $requester */
+        $requester = $this->getUser();
+        if (!$requester) return $this->json(['error' => 'Utilisateur introuvable ou non authentifié'], 401);
 
         $reservation = new Reservation();
         $reservation->setCreatedAt(new \DateTimeImmutable());
@@ -62,17 +93,17 @@ class ReservationController extends AbstractController
         $reservation->setEquipment($equipment);
         $reservation->setRequester($requester);
 
-        if (isset($data['approverId'])) {
+        if (isset($data['approverId']) && $this->isGranted('ROLE_ADMIN')) {
             $approver = $userRepo->find($data['approverId']);
             if (!$approver) return $this->json(['error' => 'Approbateur introuvable'], 404);
             $reservation->setApprover($approver);
         }
 
-        if (isset($data['validatedAt'])) {
+        if (isset($data['validatedAt']) && $this->isGranted('ROLE_ADMIN')) {
             $reservation->setValidatedAt(new \DateTimeImmutable($data['validatedAt']));
         }
 
-        if (isset($data['decisionNote'])) {
+        if (isset($data['decisionNote']) && $this->isGranted('ROLE_ADMIN')) {
             $reservation->setDecisionNote($data['decisionNote']);
         }
 
@@ -90,34 +121,50 @@ class ReservationController extends AbstractController
         EquipmentRepository $equipmentRepo,
         UserRepository $userRepo
     ): JsonResponse {
+        $user = $this->getUser();
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
+
+        if (!$isAdmin && $reservation->getRequester() !== $user) {
+            throw new AccessDeniedException('Vous ne pouvez modifier que vos propres réservations.');
+        }
+
         $data = json_decode($request->getContent(), true);
 
-        if (isset($data['quantity']))    $reservation->setQuantity((int) $data['quantity']);
-        if (isset($data['decisionNote'])) $reservation->setDecisionNote($data['decisionNote']);
-        if (isset($data['validatedAt'])) $reservation->setValidatedAt(new \DateTimeImmutable($data['validatedAt']));
+        // Un user standard ne peut modifier que la quantité et s'il est en attente
+        if (!$isAdmin && $reservation->getStatus() !== StatutReservation::EN_ATTENTE->value) {
+            return $this->json(['error' => 'Vous ne pouvez plus modifier cette réservation.'], 403);
+        }
 
-        if (isset($data['status'])) {
-            $status = StatutReservation::tryFrom($data['status']);
-            if (!$status) return $this->json(['error' => 'Statut invalide'], 400);
-            $reservation->setStatus($status->value);
+        if (isset($data['quantity']))    $reservation->setQuantity((int) $data['quantity']);
+
+        // Seul l'admin peut modifier ces champs
+        if ($isAdmin) {
+            if (isset($data['decisionNote'])) $reservation->setDecisionNote($data['decisionNote']);
+            if (isset($data['validatedAt'])) $reservation->setValidatedAt(new \DateTimeImmutable($data['validatedAt']));
+
+            if (isset($data['status'])) {
+                $status = StatutReservation::tryFrom($data['status']);
+                if (!$status) return $this->json(['error' => 'Statut invalide'], 400);
+                $reservation->setStatus($status->value);
+            }
+
+            if (isset($data['requesterId'])) {
+                $requester = $userRepo->find($data['requesterId']);
+                if (!$requester) return $this->json(['error' => 'Utilisateur introuvable'], 404);
+                $reservation->setRequester($requester);
+            }
+
+            if (isset($data['approverId'])) {
+                $approver = $userRepo->find($data['approverId']);
+                if (!$approver) return $this->json(['error' => 'Approbateur introuvable'], 404);
+                $reservation->setApprover($approver);
+            }
         }
 
         if (isset($data['equipmentId'])) {
             $equipment = $equipmentRepo->find($data['equipmentId']);
             if (!$equipment) return $this->json(['error' => 'Équipement introuvable'], 404);
             $reservation->setEquipment($equipment);
-        }
-
-        if (isset($data['requesterId'])) {
-            $requester = $userRepo->find($data['requesterId']);
-            if (!$requester) return $this->json(['error' => 'Utilisateur introuvable'], 404);
-            $reservation->setRequester($requester);
-        }
-
-        if (isset($data['approverId'])) {
-            $approver = $userRepo->find($data['approverId']);
-            if (!$approver) return $this->json(['error' => 'Approbateur introuvable'], 404);
-            $reservation->setApprover($approver);
         }
 
         $em->flush();
@@ -127,6 +174,8 @@ class ReservationController extends AbstractController
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete(Reservation $reservation, EntityManagerInterface $em): JsonResponse
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $em->remove($reservation);
         $em->flush();
         return $this->json(['message' => 'Réservation supprimée'], 200);

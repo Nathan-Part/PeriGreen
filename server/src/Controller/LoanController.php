@@ -38,6 +38,8 @@ class LoanController extends AbstractController
         UserRepository $userRepo,
         ReservationRepository $reservationRepo
     ): JsonResponse {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $data = json_decode($request->getContent(), true);
 
         $required = ['pickupDate', 'dueDate', 'status', 'quantity', 'reservationId', 'equipmentId', 'borrowerId'];
@@ -89,6 +91,8 @@ class LoanController extends AbstractController
         UserRepository $userRepo,
         ReservationRepository $reservationRepo
     ): JsonResponse {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $data = json_decode($request->getContent(), true);
 
         if (isset($data['pickupDate']))  $loan->setPickupDate(new \DateTimeImmutable($data['pickupDate']));
@@ -128,6 +132,8 @@ class LoanController extends AbstractController
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete(Loan $loan, EntityManagerInterface $em): JsonResponse
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $em->remove($loan);
         $em->flush();
         return $this->json(['message' => 'Prêt supprimé'], 200);

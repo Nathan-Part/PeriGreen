@@ -66,6 +66,8 @@ final class AuthController extends AbstractController
             'id'    => $user->getId(),
             'email' => $user->getUserIdentifier(),
             'roles' => $user->getRoles(),
+            'fullName' => method_exists($user, 'getFullName') ? $user->getFullName() : null,
+            'universityId' => method_exists($user, 'getUniversityId') ? $user->getUniversityId() : null,
         ]);
     }
 }
