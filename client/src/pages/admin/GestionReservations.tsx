@@ -21,9 +21,9 @@ function StatutBadge({ status }: { status: string }) {
 
 export default function GestionReservations() {
   const { reservations, fetchAll, isLoading, updateStatus } = useReservations();
-  const [activeNote, setActiveNote] = useState<Record<number, string>>({});
+  const [activeNote, setActiveNote]       = useState<Record<number, string>>({});
   const [actionLoading, setActionLoading] = useState<number | null>(null);
-  const [filterStatut, setFilterStatut] = useState('TOUS');
+  const [filterStatut, setFilterStatut]   = useState('TOUS');
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -70,7 +70,7 @@ export default function GestionReservations() {
                 <th className="px-5 py-3.5 text-xs font-bold text-gray-400 uppercase tracking-widest">Qté</th>
                 <th className="px-5 py-3.5 text-xs font-bold text-gray-400 uppercase tracking-widest">Demandée le</th>
                 <th className="px-5 py-3.5 text-xs font-bold text-gray-400 uppercase tracking-widest">Statut</th>
-                <th className="px-5 py-3.5 text-xs font-bold text-gray-400 uppercase tracking-widest">Note</th>
+                <th className="px-5 py-3.5 text-xs font-bold text-gray-400 uppercase tracking-widest">Note / Échéance</th>
                 <th className="px-5 py-3.5 text-xs font-bold text-gray-400 uppercase tracking-widest">Actions</th>
               </tr>
             </thead>
@@ -98,6 +98,8 @@ export default function GestionReservations() {
                       {r.createdAt ? new Date(r.createdAt).toLocaleDateString('fr-FR') : '—'}
                     </td>
                     <td className="px-5 py-4"><StatutBadge status={r.status} /></td>
+
+                    {/* Note */}
                     <td className="px-5 py-4">
                       {r.status === 'EN_ATTENTE' ? (
                         <div className="flex items-center gap-1.5">
@@ -114,13 +116,15 @@ export default function GestionReservations() {
                         <span className="text-xs text-gray-400 italic">{r.decisionNote ?? '—'}</span>
                       )}
                     </td>
+
+                    {/* Actions */}
                     <td className="px-5 py-4">
                       {r.status === 'EN_ATTENTE' ? (
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleAction(r.id, 'VALIDEE')}
                             disabled={actionLoading === r.id}
-                            title="Valider"
+                            title="Valider et créer le prêt"
                             className="p-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg transition-colors disabled:opacity-50"
                           >
                             {actionLoading === r.id ? (

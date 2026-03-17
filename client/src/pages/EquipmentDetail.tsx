@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
-import { ArrowLeft, ClipboardList, User as UserIcon, FileText, CheckCircle2, AlertCircle, Laptop, Hash, Tag } from 'lucide-react';
+import { ArrowLeft, ClipboardList, Calendar, User as UserIcon, FileText, CheckCircle2, AlertCircle, Laptop, Hash, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 
@@ -17,6 +17,7 @@ const reservationFormSchema = z.object({
     requesterId: z.coerce.number().min(1, "L'utilisateur est requis"),
     quantity: z.coerce.number().min(1, "La quantité doit être au moins 1"),
     status: z.string().optional(),
+    dueDate: z.string().optional(),
 });
 
 type ReservationFormData = z.infer<typeof reservationFormSchema>;
@@ -44,6 +45,7 @@ export default function EquipmentDetail() {
         defaultValues: {
             quantity: 1,
             status: 'EN_ATTENTE',
+            dueDate: (() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString().split('T')[0]; })()
         }
     });
 
@@ -54,6 +56,7 @@ export default function EquipmentDetail() {
             requesterId: data.requesterId,
             quantity: data.quantity,
             status: data.status || 'EN_ATTENTE',
+            ...(data.dueDate ? { dueDate: data.dueDate } : {}),
         };
 
         createReservation.mutate(apiData, {
@@ -227,8 +230,21 @@ export default function EquipmentDetail() {
                                                     disabled={createReservation.isPending}
                                                 >
                                                     <option value="EN_ATTENTE">En attente</option>
-                                                    <option value="VALIDEE">Validée directement</option>
+                                                    <option value="VALIDEE">Validée directement (crée un prêt)</option>
                                                 </select>
+                                            </div>
+
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1.5">
+                                                    <Calendar size={12} /> Date d'échéance du prêt
+                                                </label>
+                                                <input
+                                                    type="date"
+                                                    {...register('dueDate')}
+                                                    className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                                                    disabled={createReservation.isPending}
+                                                />
+                                                <p className="text-xs text-gray-400">Requise uniquement si le statut est « Validée »</p>
                                             </div>
 
                                             <Button

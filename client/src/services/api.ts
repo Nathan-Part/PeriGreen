@@ -253,6 +253,7 @@ export const createReservation = async (data: {
   equipmentId: number;
   requesterId?: number;
   status?: string;
+  dueDate?: string;
 }) => {
   return fetchApi<Reservation>('/api/reservations', {
     method: 'POST',

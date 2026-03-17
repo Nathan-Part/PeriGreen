@@ -2,9 +2,12 @@
 
 namespace App\Controller;
 
+use App\Entity\Loan;
 use App\Entity\Reservation;
+use App\Enum\LoanStatus;
 use App\Enum\StatutReservation;
 use App\Repository\EquipmentRepository;
+use App\Repository\LoanRepository;
 use App\Repository\ReservationRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -58,7 +61,8 @@ class ReservationController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         EquipmentRepository $equipmentRepo,
-        UserRepository $userRepo
+        UserRepository $userRepo,
+        LoanRepository $loanRepo
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
@@ -118,6 +122,34 @@ class ReservationController extends AbstractController
         $em->persist($reservation);
         $em->flush();
 
+        // ── Création automatique du Loan si statut = VALIDEE directement ──
+        if ($status === StatutReservation::VALIDEE && $this->isGranted('ROLE_ADMIN')) {
+            if (!$reservation->getValidatedAt()) {
+                $reservation->setValidatedAt(new \DateTimeImmutable());
+            }
+            /** @var \App\Entity\User $admin */
+            $admin = $this->getUser();
+            if (!$reservation->getApprover()) {
+                $reservation->setApprover($admin);
+            }
+
+            $dueDate = isset($data['dueDate'])
+                ? new \DateTimeImmutable($data['dueDate'])
+                : new \DateTimeImmutable('+30 days');
+
+            $loan = new Loan();
+            $loan->setPickupDate(new \DateTimeImmutable());
+            $loan->setDueDate($dueDate);
+            $loan->setStatus(LoanStatus::EN_COURS);
+            $loan->setQuantity($reservation->getQuantity());
+            $loan->setEquipment($reservation->getEquipment());
+            $loan->setBorrower($reservation->getRequester());
+            $loan->setReservation($reservation);
+
+            $em->persist($loan);
+            $em->flush();
+        }
+
         return $this->json($this->format($reservation), 201);
     }
 
@@ -127,7 +159,8 @@ class ReservationController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         EquipmentRepository $equipmentRepo,
-        UserRepository $userRepo
+        UserRepository $userRepo,
+        LoanRepository $loanRepo
     ): JsonResponse {
         $user = $this->getUser();
         $isAdmin = $this->isGranted('ROLE_ADMIN');
@@ -144,6 +177,8 @@ class ReservationController extends AbstractController
         }
 
         if (isset($data['quantity']))    $reservation->setQuantity((int) $data['quantity']);
+
+        $previousStatus = $reservation->getStatus();
 
         // Seul l'admin peut modifier ces champs
         if ($isAdmin) {
@@ -173,6 +208,41 @@ class ReservationController extends AbstractController
             $equipment = $equipmentRepo->find($data['equipmentId']);
             if (!$equipment) return $this->json(['error' => 'Équipement introuvable'], 404);
             $reservation->setEquipment($equipment);
+        }
+
+        // ── Création automatique du Loan quand la réservation est validée ──
+        if (
+            $isAdmin
+            && $reservation->getStatus() === StatutReservation::VALIDEE->value
+            && $previousStatus !== StatutReservation::VALIDEE->value
+            && $loanRepo->findOneBy(['reservation' => $reservation]) === null
+        ) {
+            // validatedAt = maintenant si pas déjà défini
+            if (!$reservation->getValidatedAt()) {
+                $reservation->setValidatedAt(new \DateTimeImmutable());
+            }
+
+            // Approver = admin connecté si pas encore défini
+            /** @var \App\Entity\User $admin */
+            $admin = $this->getUser();
+            if (!$reservation->getApprover()) {
+                $reservation->setApprover($admin);
+            }
+
+            $dueDate = isset($data['dueDate'])
+                ? new \DateTimeImmutable($data['dueDate'])
+                : new \DateTimeImmutable('+30 days');
+
+            $loan = new Loan();
+            $loan->setPickupDate(new \DateTimeImmutable());
+            $loan->setDueDate($dueDate);
+            $loan->setStatus(LoanStatus::EN_COURS);
+            $loan->setQuantity($reservation->getQuantity());
+            $loan->setEquipment($reservation->getEquipment());
+            $loan->setBorrower($reservation->getRequester());
+            $loan->setReservation($reservation);
+
+            $em->persist($loan);
         }
 
         $em->flush();
