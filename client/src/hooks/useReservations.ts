@@ -13,7 +13,7 @@ interface ReservationsState {
   fetchAll: () => Promise<void>;
   fetchMine: (userId: number) => Promise<void>;
   create: (data: { quantity: number; equipmentId: number }) => Promise<void>;
-  updateStatus: (id: number, status: string, decisionNote?: string) => Promise<void>;
+  updateStatus: (id: number, status: string, decisionNote?: string, dueDate?: string) => Promise<void>;
 }
 
 export const useReservations = create<ReservationsState>((set) => ({
@@ -53,9 +53,12 @@ export const useReservations = create<ReservationsState>((set) => ({
     }
   },
 
-  updateStatus: async (id, status, decisionNote) => {
+  updateStatus: async (id, status, decisionNote, dueDate) => {
     try {
-      const updated = await updateReservation(id, { status, decisionNote } as Partial<Reservation>);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const payload: any = { status, decisionNote };
+      if (dueDate) payload.dueDate = dueDate;
+      const updated = await updateReservation(id, payload as Partial<Reservation>);
       set((s) => ({
         reservations: s.reservations.map((r) => (r.id === id ? updated : r)),
       }));
