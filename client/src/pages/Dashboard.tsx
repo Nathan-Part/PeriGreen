@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, type Variants } from 'framer-motion';
 import {
   Laptop, ClipboardList, Archive, AlertCircle,
-  CheckCircle2, XCircle, ArrowRight, Clock
+  CheckCircle2, ArrowRight, Clock
 } from 'lucide-react';
 import { useEquipments } from '../hooks/useEquipment';
 import { useLoans } from '../hooks/useLoans';
@@ -186,16 +186,7 @@ export default function Dashboard() {
         </div>
       </motion.div>
 
-      {/* Avertissement indisponibilités */}
-      {eqIndispos > 0 && (
-        <motion.div variants={item} className="flex items-start gap-3 p-4 bg-orange-50 border border-orange-200 rounded-2xl">
-          <XCircle size={18} className="text-orange-500 shrink-0 mt-0.5" />
-          <p className="text-sm text-orange-700">
-            <strong>{eqIndispos} équipement{eqIndispos > 1 ? 's' : ''}</strong>{' '}
-            {eqIndispos > 1 ? 'sont' : 'est'} actuellement en maintenance ou en cours d&apos;emprunt.
-          </p>
-        </motion.div>
-      )}
+
     </motion.div>
   );
 }

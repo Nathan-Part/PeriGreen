@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Laptop, Archive, BarChart3,
-  Menu, Bell, LogOut, ClipboardList, Users, CalendarCheck
+  Menu, LogOut, ClipboardList, Users, CalendarCheck
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { motion } from 'framer-motion';
@@ -138,12 +138,7 @@ export const AppLayout = () => {
             <Menu size={20} />
           </button>
           <div className="flex-1" />
-          <div className="flex items-center gap-3">
-            <button className="relative p-2 text-gray-400 hover:text-green-600 transition-colors rounded-lg hover:bg-green-50">
-              <Bell size={19} />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500" />
-            </button>
-          </div>
+
         </header>
 
         {/* Mobile nav overlay */}
