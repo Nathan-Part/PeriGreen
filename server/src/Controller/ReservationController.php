@@ -87,6 +87,13 @@ class ReservationController extends AbstractController
         $requester = $this->getUser();
         if (!$requester) return $this->json(['error' => 'Utilisateur introuvable ou non authentifié'], 401);
 
+        // Si l'admin passe un requesterId, on crée la réservation au nom de cet utilisateur
+        if (isset($data['requesterId']) && $this->isGranted('ROLE_ADMIN')) {
+            $targetUser = $userRepo->find($data['requesterId']);
+            if (!$targetUser) return $this->json(['error' => 'Utilisateur cible introuvable'], 404);
+            $requester = $targetUser;
+        }
+
         $reservation = new Reservation();
         $reservation->setCreatedAt(new \DateTimeImmutable());
         $reservation->setStatus($status->value);

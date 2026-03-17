@@ -251,6 +251,8 @@ export const getReservationById = async (id: number): Promise<Reservation> => {
 export const createReservation = async (data: {
   quantity: number;
   equipmentId: number;
+  requesterId?: number;
+  status?: string;
 }) => {
   return fetchApi<Reservation>('/api/reservations', {
     method: 'POST',
