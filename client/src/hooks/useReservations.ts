@@ -3,6 +3,7 @@ import {
   getReservations,
   createReservation as apiCreate,
   updateReservation,
+  cancelReservation as apiCancel,
   type Reservation,
 } from '../services/api';
 
@@ -14,6 +15,7 @@ interface ReservationsState {
   fetchMine: (userId: number) => Promise<void>;
   create: (data: { quantity: number; equipmentId: number }) => Promise<void>;
   updateStatus: (id: number, status: string, decisionNote?: string, dueDate?: string) => Promise<void>;
+  cancel: (id: number) => Promise<void>;
 }
 
 export const useReservations = create<ReservationsState>((set) => ({
@@ -59,6 +61,18 @@ export const useReservations = create<ReservationsState>((set) => ({
       const payload: any = { status, decisionNote };
       if (dueDate) payload.dueDate = dueDate;
       const updated = await updateReservation(id, payload as Partial<Reservation>);
+      set((s) => ({
+        reservations: s.reservations.map((r) => (r.id === id ? updated : r)),
+      }));
+    } catch (e) {
+      set({ error: (e as Error).message });
+      throw e;
+    }
+  },
+
+  cancel: async (id) => {
+    try {
+      const updated = await apiCancel(id);
       set((s) => ({
         reservations: s.reservations.map((r) => (r.id === id ? updated : r)),
       }));

@@ -249,6 +249,32 @@ class ReservationController extends AbstractController
         return $this->json($this->format($reservation));
     }
 
+    #[Route('/{id}/annuler', name: 'cancel', methods: ['PATCH'])]
+    public function cancel(Reservation $reservation, EntityManagerInterface $em): JsonResponse
+    {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+
+        if (!$user) {
+            return $this->json(['error' => 'Non authentifié'], 401);
+        }
+
+        // Vérifier que la réservation appartient à l'utilisateur connecté (ou admin)
+        if (!$this->isGranted('ROLE_ADMIN') && $reservation->getRequester() !== $user) {
+            throw new AccessDeniedException('Vous ne pouvez annuler que vos propres réservations.');
+        }
+
+        // Vérifier que la réservation est encore EN_ATTENTE
+        if ($reservation->getStatus() !== StatutReservation::EN_ATTENTE->value) {
+            return $this->json(['error' => 'Seules les réservations en attente peuvent être annulées.'], 403);
+        }
+
+        $reservation->setStatus(StatutReservation::ANNULEE->value);
+        $em->flush();
+
+        return $this->json($this->format($reservation));
+    }
+
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete(Reservation $reservation, EntityManagerInterface $em): JsonResponse
     {

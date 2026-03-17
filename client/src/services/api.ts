@@ -279,6 +279,12 @@ export const getMyReservations = async (): Promise<Reservation[]> => {
   return fetchApi<Reservation[]>('/api/reservations/me');
 };
 
+export const cancelReservation = async (id: number): Promise<Reservation> => {
+  return fetchApi<Reservation>(`/api/reservations/${id}/annuler`, {
+    method: 'PATCH',
+  });
+};
+
 // User API
 export interface User {
   id: number;
