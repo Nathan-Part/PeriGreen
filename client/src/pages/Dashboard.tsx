@@ -1,214 +1,201 @@
-import { motion, type Variants } from 'framer-motion';
-import { useLoans } from '../hooks/useLoans';
-import { useEquipments } from '../hooks/useEquipment';
-import { Card, CardContent } from '../components/ui/Card';
-import { Badge } from '../components/ui/Badge';
-import { Button } from '../components/ui/Button';
-import { Leaf, Zap, Clock, ArrowRight, Laptop, AlertCircle } from 'lucide-react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, type Variants } from 'framer-motion';
+import {
+  Laptop, ClipboardList, Archive, AlertCircle,
+  CheckCircle2, XCircle, ArrowRight, Clock
+} from 'lucide-react';
+import { useEquipments } from '../hooks/useEquipment';
+import { useLoans } from '../hooks/useLoans';
+import { useReservations } from '../hooks/useReservations';
 
-const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
-};
+const container: Variants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.07 } } };
+const item: Variants = { hidden: { y: 16, opacity: 0 }, visible: { y: 0, opacity: 1, transition: { duration: 0.35, ease: 'easeOut' } } };
 
-const itemVariants: Variants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.5, ease: 'easeOut' } }
-};
+function StatutBadge({ status }: { status: string }) {
+  const map: Record<string, { label: string; cls: string }> = {
+    EN_ATTENTE: { label: 'En attente', cls: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+    VALIDEE:    { label: 'Validée',    cls: 'bg-green-50  text-green-700  border-green-200' },
+    REFUSEE:    { label: 'Refusée',    cls: 'bg-red-50    text-red-700    border-red-200' },
+    ANNULEE:    { label: 'Annulée',    cls: 'bg-gray-50   text-gray-600   border-gray-200' },
+  };
+  const cfg = map[status] ?? { label: status, cls: 'bg-gray-50 text-gray-600 border-gray-200' };
+  return (
+    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${cfg.cls}`}>
+      {cfg.label}
+    </span>
+  );
+}
 
 export default function Dashboard() {
-    const { data: loans, isLoading: loansLoading } = useLoans();
-    const { data: equipments } = useEquipments();
+  const { data: equipments } = useEquipments();
+  const { data: loans, isLoading: loansLoading } = useLoans();
+  const { reservations, fetchAll, isLoading: resLoading } = useReservations();
 
-    const totalEquipments = equipments?.length ?? 0;
-    const reusedMaterials = Math.floor(totalEquipments * 0.85);
-    const co2Saved = reusedMaterials * 15;
-    const urgentLoans = loans?.filter(l => l.status === 'OVERDUE' || l.status === 'ACTIVE').slice(0, 3) ?? [];
+  useEffect(() => { fetchAll(); }, [fetchAll]);
 
-    return (
-        <motion.div
-            className="relative -m-6 min-h-[calc(100vh-64px)] overflow-hidden"
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-        >
-            {/* Background Video Hero */}
-            <div className="absolute inset-0 z-0">
-                <div className="absolute inset-0 bg-black/50 z-10" />
-                <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                        // Fallback: hide video on error, show gradient background
-                        (e.currentTarget as HTMLVideoElement).style.display = 'none';
-                    }}
-                >
-                    <source
-                        src="https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4"
-                        type="video/mp4"
-                    />
-                </video>
-                {/* Fallback gradient if video fails */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#1b5e20] via-[#2e7d32] to-[#388e3c] -z-10" />
+  const totalEq         = equipments?.length ?? 0;
+  const enAttente       = reservations.filter(r => r.status === 'EN_ATTENTE');
+  const loansActifs     = loans?.filter(l => l.status === 'ACTIVE' || l.status === 'EN_COURS').length ?? 0;
+  const loansEnRetard   = loans?.filter(l => l.status === 'OVERDUE' || l.status === 'EN_RETARD') ?? [];
+  const eqIndispos      = equipments?.filter(e => e.status === 'IN_USE' || e.status === 'MAINTENANCE').length ?? 0;
+
+  const kpis = [
+    { label: 'Équipements total', value: totalEq,         icon: Laptop,        color: 'bg-green-50  text-green-600',  link: '/dashboard/inventory' },
+    { label: 'Réservations en attente', value: enAttente.length, icon: ClipboardList, color: 'bg-yellow-50 text-yellow-600', link: '/dashboard/reservations' },
+    { label: 'Emprunts actifs',   value: loansActifs,     icon: Archive,       color: 'bg-blue-50   text-blue-600',   link: '/dashboard/loans' },
+    { label: 'Équipements indispos', value: eqIndispos,   icon: AlertCircle,   color: 'bg-red-50    text-red-500',    link: '/dashboard/inventory' },
+  ];
+
+  return (
+    <motion.div className="space-y-8" variants={container} initial="hidden" animate="visible">
+
+      {/* Titre */}
+      <motion.div variants={item}>
+        <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
+        <p className="text-sm text-gray-500 mt-1">Vue d&apos;ensemble de votre parc PeriGreen.</p>
+      </motion.div>
+
+      {/* KPIs */}
+      <motion.div variants={item} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {kpis.map((kpi) => (
+          <Link key={kpi.label} to={kpi.link}>
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
+              <div className={`p-3 rounded-xl ${kpi.color}`}>
+                <kpi.icon size={20} />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-gray-900">{kpi.value}</p>
+                <p className="text-xs text-gray-400 font-medium leading-tight">{kpi.label}</p>
+              </div>
             </div>
+          </Link>
+        ))}
+      </motion.div>
 
-            {/* Hero Content */}
-            <div className="relative z-20 px-6 py-16 md:py-24 flex flex-col items-center justify-center text-center text-white min-h-[55vh]">
-                <motion.div
-                    variants={itemVariants}
-                    className="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sm font-medium"
-                >
-                    <Leaf size={16} className="text-green-300" />
-                    <span>PeriGreen · Technologie Durable</span>
-                </motion.div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                <motion.h1
-                    variants={itemVariants}
-                    className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 drop-shadow-lg"
-                >
-                    Gérez votre parc,<br />
-                    <span className="text-green-300">préservez l'avenir.</span>
-                </motion.h1>
-
-                <motion.p
-                    variants={itemVariants}
-                    className="max-w-2xl text-lg text-white/80 mb-10 leading-relaxed"
-                >
-                    Optimisez le cycle de vie de vos équipements informatiques universitaires.
-                    Réduisez votre empreinte carbone grâce à un réemploi intelligent.
-                </motion.p>
-
-                <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-4">
-                    <Link to="/inventory">
-                        <Button size="lg" className="bg-white text-green-800 hover:bg-green-50 border-none font-bold px-8 shadow-xl">
-                            Explorer l'inventaire
-                        </Button>
+        {/* Réservations en attente */}
+        <motion.div variants={item} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h2 className="font-semibold text-gray-800 flex items-center gap-2 text-sm">
+              <ClipboardList size={16} className="text-yellow-500" />
+              Réservations en attente ({enAttente.length})
+            </h2>
+            <Link to="/dashboard/reservations" className="text-xs text-green-600 hover:underline font-medium flex items-center gap-1">
+              Gérer <ArrowRight size={12} />
+            </Link>
+          </div>
+          <div className="divide-y divide-gray-50">
+            {resLoading ? (
+              <div className="p-8 text-center text-gray-400 text-sm">Chargement…</div>
+            ) : enAttente.length === 0 ? (
+              <div className="p-8 text-center text-gray-400 text-sm flex flex-col items-center gap-2">
+                <CheckCircle2 size={32} className="text-gray-200" />
+                Aucune réservation en attente.
+              </div>
+            ) : (
+              enAttente.slice(0, 6).map((r) => (
+                <div key={r.id} className="px-6 py-3.5 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{r.equipment?.name ?? '—'}</p>
+                    <p className="text-xs text-gray-400">
+                      {r.requester?.email ?? '—'} · Qté {r.quantity}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <StatutBadge status={r.status} />
+                    <Link
+                      to="/dashboard/reservations"
+                      className="p-1.5 text-green-500 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
+                      title="Gérer"
+                    >
+                      <ArrowRight size={14} />
                     </Link>
-                    <Link to="/loans">
-                        <Button
-                            size="lg"
-                            variant="ghost"
-                            className="bg-white/10 backdrop-blur-md border border-white/30 hover:bg-white/20 text-white"
-                        >
-                            Gérer les emprunts
-                        </Button>
-                    </Link>
-                </motion.div>
-            </div>
-
-            {/* KPI Cards — Glassmorphism */}
-            <div className="relative z-20 px-6 -mt-8 pb-16">
-                <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {[
-                        {
-                            icon: Leaf,
-                            value: `${reusedMaterials}`,
-                            label: 'Matériel réemployé',
-                            unit: 'unités',
-                            badge: 'Impact +',
-                            badgeVariant: 'success' as const,
-                            iconBg: 'bg-green-100',
-                            iconColor: 'text-green-700',
-                        },
-                        {
-                            icon: Zap,
-                            value: `${co2Saved}`,
-                            label: 'CO₂ Économisé',
-                            unit: 'kg',
-                            badge: null,
-                            iconBg: 'bg-blue-100',
-                            iconColor: 'text-blue-700',
-                        },
-                        {
-                            icon: Clock,
-                            value: '92%',
-                            label: 'Disponibilité du parc',
-                            unit: '',
-                            badge: null,
-                            iconBg: 'bg-orange-100',
-                            iconColor: 'text-orange-700',
-                        },
-                    ].map((kpi, i) => (
-                        <motion.div key={i} variants={itemVariants}>
-                            <Card className="bg-white/85 backdrop-blur-xl border-white/30 shadow-2xl hover:-translate-y-1 transition-all duration-300">
-                                <CardContent className="pt-6">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className={`p-3 ${kpi.iconBg} ${kpi.iconColor} rounded-2xl`}>
-                                            <kpi.icon size={24} />
-                                        </div>
-                                        {kpi.badge && <Badge variant={kpi.badgeVariant ?? 'success'}>{kpi.badge}</Badge>}
-                                    </div>
-                                    <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">{kpi.label}</p>
-                                    <div className="text-3xl font-black text-gray-900">
-                                        {kpi.value} <span className="text-base font-normal text-gray-500">{kpi.unit}</span>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-                    ))}
+                  </div>
                 </div>
-
-                {/* Urgent Loans */}
-                <div className="max-w-6xl mx-auto mt-12">
-                    <motion.div variants={itemVariants}>
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-2xl font-bold text-white flex items-center gap-2 drop-shadow">
-                                <AlertCircle size={22} className="text-red-400" />
-                                Emprunts urgents
-                            </h2>
-                            <Link
-                                to="/loans"
-                                className="text-green-200 hover:text-white font-medium flex items-center gap-1 group transition-colors"
-                            >
-                                Voir tout <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                            </Link>
-                        </div>
-
-                        <div className="space-y-4">
-                            {loansLoading ? (
-                                <div className="text-center text-white/60 py-10 italic">Chargement…</div>
-                            ) : urgentLoans.length > 0 ? (
-                                urgentLoans.map((loan) => (
-                                    <Card key={loan.id} className="bg-white/85 backdrop-blur-xl border-white/20 shadow-lg">
-                                        <CardContent className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                            <div className="flex items-center gap-4">
-                                                <div className="bg-gray-100 p-2 rounded-lg text-gray-500">
-                                                    <Laptop size={20} />
-                                                </div>
-                                                <div>
-                                                    <p className="font-semibold text-gray-900">{loan.equipment?.name ?? 'Matériel inconnu'}</p>
-                                                    <p className="text-sm text-gray-500">
-                                                        Emprunteur : {loan.borrower?.email ?? 'Inconnu'}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <div className="text-right">
-                                                    <p className="text-[10px] uppercase tracking-widest text-gray-400">Échéance</p>
-                                                    <p className={loan.status === 'OVERDUE' ? 'text-red-600 font-bold' : 'text-gray-800'}>
-                                                        {loan.dueDate ?? 'Non définie'}
-                                                    </p>
-                                                </div>
-                                                <Badge variant={loan.status === 'OVERDUE' ? 'danger' : 'info'}>
-                                                    {loan.status === 'OVERDUE' ? 'EN RETARD' : 'EN COURS'}
-                                                </Badge>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                ))
-                            ) : (
-                                <div className="bg-white/20 border border-dashed border-white/30 rounded-2xl p-12 text-center">
-                                    <p className="text-white/70 italic">Aucun emprunt urgent à signaler. Bravo !</p>
-                                </div>
-                            )}
-                        </div>
-                    </motion.div>
-                </div>
-            </div>
+              ))
+            )}
+          </div>
         </motion.div>
-    );
+
+        {/* Emprunts en retard */}
+        <motion.div variants={item} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h2 className="font-semibold text-gray-800 flex items-center gap-2 text-sm">
+              <AlertCircle size={16} className="text-red-500" />
+              Emprunts en retard ({loansEnRetard.length})
+            </h2>
+            <Link to="/dashboard/loans" className="text-xs text-green-600 hover:underline font-medium flex items-center gap-1">
+              Voir tout <ArrowRight size={12} />
+            </Link>
+          </div>
+          <div className="divide-y divide-gray-50">
+            {loansLoading ? (
+              <div className="p-8 text-center text-gray-400 text-sm">Chargement…</div>
+            ) : loansEnRetard.length === 0 ? (
+              <div className="p-8 text-center text-gray-400 text-sm flex flex-col items-center gap-2">
+                <CheckCircle2 size={32} className="text-gray-200" />
+                Aucun emprunt en retard. Bravo !
+              </div>
+            ) : (
+              loansEnRetard.slice(0, 6).map((loan) => (
+                <div key={loan.id} className="px-6 py-3.5 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{loan.equipment?.name ?? '—'}</p>
+                    <p className="text-xs text-gray-400">
+                      {loan.borrower?.email ?? '—'}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-200">
+                      <Clock size={11} /> {loan.dueDate ?? '—'}
+                    </span>
+                    <span className="text-[10px] text-red-400 font-medium">EN RETARD</span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </motion.div>
+
+      </div>
+
+      {/* Actions rapides admin */}
+      <motion.div variants={item}>
+        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">Actions rapides</h3>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            to="/dashboard/inventory"
+            className="flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-sm"
+          >
+            <Laptop size={15} /> Gérer l&apos;inventaire
+          </Link>
+          <Link
+            to="/dashboard/reservations"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 border border-gray-200 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
+          >
+            <ClipboardList size={15} /> Traiter les réservations
+          </Link>
+          <Link
+            to="/dashboard/loans"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 border border-gray-200 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
+          >
+            <Archive size={15} /> Suivre les emprunts
+          </Link>
+        </div>
+      </motion.div>
+
+      {/* Avertissement indisponibilités */}
+      {eqIndispos > 0 && (
+        <motion.div variants={item} className="flex items-start gap-3 p-4 bg-orange-50 border border-orange-200 rounded-2xl">
+          <XCircle size={18} className="text-orange-500 shrink-0 mt-0.5" />
+          <p className="text-sm text-orange-700">
+            <strong>{eqIndispos} équipement{eqIndispos > 1 ? 's' : ''}</strong>{' '}
+            {eqIndispos > 1 ? 'sont' : 'est'} actuellement en maintenance ou en cours d&apos;emprunt.
+          </p>
+        </motion.div>
+      )}
+    </motion.div>
+  );
 }
