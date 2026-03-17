@@ -32,13 +32,11 @@ function LoadingSpinner() {
 }
 
 function App() {
-  const { checkAuth, isLoading } = useAuth();
+  const { checkAuth } = useAuth();
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
-
-  if (isLoading) return <LoadingSpinner />;
 
   return (
     <BrowserRouter>
