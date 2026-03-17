@@ -1,0 +1,50 @@
+// client/src/styles/main.scss
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+// --- Imports Tailwind ---
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// --- Styles globaux ---
+body {
+  font-family: var.$font-family-sans;
+  background-color: var.$color-surface;
+  color: var.$color-text-main;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// --- Classes utilitaires custom SCSS (pour migration progressive) ---
+
+// Boutons
+.btn-primary {
+  @include mix.btn-primary;
+}
+
+.btn-secondary {
+  @include mix.btn-secondary;
+}
+
+// Composants structurels
+.pg-card {
+  @include mix.card;
+}
+
+// Badges de statuts
+.badge-success {
+  @include mix.badge(var.$color-status-success-bg, var.$color-status-success, #bbf7d0);
+}
+.badge-warning {
+  @include mix.badge(var.$color-status-warning-bg, var.$color-status-warning, #fef08a);
+}
+.badge-danger {
+  @include mix.badge(var.$color-status-danger-bg, var.$color-status-danger, #fecaca);
+}
+.badge-info {
+  @include mix.badge(var.$color-status-info-bg, var.$color-status-info, #bfdbfe);
+}
+.badge-default {
+  @include mix.badge(var.$color-surface, var.$color-text-muted, var.$color-surface-border);
+}

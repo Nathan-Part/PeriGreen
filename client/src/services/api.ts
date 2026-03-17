@@ -250,9 +250,7 @@ export const getReservationById = async (id: number): Promise<Reservation> => {
 
 export const createReservation = async (data: {
   quantity: number;
-  status: string;
   equipmentId: number;
-  requesterId: number;
 }) => {
   return fetchApi<Reservation>('/api/reservations', {
     method: 'POST',
@@ -271,6 +269,11 @@ export const deleteReservation = async (id: number) => {
   return fetchApi<{ message: string }>(`/api/reservations/${id}`, {
     method: 'DELETE',
   });
+};
+
+/** Mes réservations (filtrées par le backend via le token JWT) */
+export const getMyReservations = async (): Promise<Reservation[]> => {
+  return fetchApi<Reservation[]>('/api/reservations/me');
 };
 
 // User API

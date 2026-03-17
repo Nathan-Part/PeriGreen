@@ -32,6 +32,8 @@ class EquipmentController extends AbstractController
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $em, CategoryRepository $categoryRepo): JsonResponse
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $data = json_decode($request->getContent(), true);
 
         $required = ['name', 'description', 'brand', 'model', 'serialNumber', 'etat', 'totalQuantity', 'imageUrl', 'categoryId'];
@@ -66,6 +68,8 @@ class EquipmentController extends AbstractController
     #[Route('/{id}', name: 'update', methods: ['PUT'])]
     public function update(Equipment $equipment, Request $request, EntityManagerInterface $em, CategoryRepository $categoryRepo): JsonResponse
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $data = json_decode($request->getContent(), true);
 
         if (isset($data['name']))          $equipment->setName($data['name']);
@@ -93,6 +97,8 @@ class EquipmentController extends AbstractController
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete(Equipment $equipment, EntityManagerInterface $em): JsonResponse
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $em->remove($equipment);
         $em->flush();
 

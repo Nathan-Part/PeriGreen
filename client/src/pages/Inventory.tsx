@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEquipments, useCategories } from '../hooks/useEquipment';
+import { useAuth } from '../hooks/useAuth';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-import { Search, Filter, Laptop, Smartphone, Monitor, HardDrive, Package, type LucideIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Search, Filter, Laptop, Smartphone, Monitor, HardDrive, Package, PlusCircle, type LucideIcon } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
     'Portable': Laptop,
@@ -26,6 +27,9 @@ const ETAT_BADGE: Record<string, React.ReactElement> = {
 export default function Inventory() {
     const { data: equipments, isLoading: isEquipLoading } = useEquipments();
     const { data: apiCategories, isLoading: isCatsLoading } = useCategories();
+    const { user } = useAuth();
+    const navigate = useNavigate();
+    const isAdmin = user?.roles?.includes('ROLE_ADMIN');
     const [search, setSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
 
@@ -54,10 +58,22 @@ export default function Inventory() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-gray-900">Inventaire du matériel</h1>
-                    <p className="text-gray-500 mt-2">Consultez et gérez l'ensemble du parc informatique de l'établissement.</p>
+                    <p className="text-gray-500 mt-2">
+                        {isAdmin
+                            ? 'Gérez l\'ensemble du parc informatique.'
+                            : 'Consultez le matériel disponible et faites vos demandes.'}
+                    </p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
+                    {isAdmin && (
+                        <button
+                            onClick={() => navigate('/dashboard/inventory/new')}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors"
+                        >
+                            <PlusCircle size={15} /> Ajouter matériel
+                        </button>
+                    )}
                     <div className="relative group w-full md:w-80">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors" size={18} />
                         <input
@@ -144,11 +160,21 @@ export default function Inventory() {
                                             </div>
                                         </CardContent>
                                         <CardFooter className="pt-0 border-none">
-                                            <Link to={`/inventory/${equipment.id}`} className="w-full">
-                                                <Button variant="secondary" className="w-full font-bold group-hover:bg-primary-50 group-hover:text-primary-600 border-none">
-                                                    Détails &amp; Emprunter
-                                                </Button>
-                                            </Link>
+                                            {isAdmin ? (
+                                                <div className="flex gap-2 w-full">
+                                                    <Link to={`/dashboard/inventory/${equipment.id}`} className="flex-1">
+                                                        <Button variant="secondary" className="w-full font-bold text-xs border-none">
+                                                            Détails / Modifier
+                                                        </Button>
+                                                    </Link>
+                                                </div>
+                                            ) : (
+                                                <Link to={`/espace/reservations/nouvelle`} className="w-full">
+                                                    <Button variant="secondary" className="w-full font-bold group-hover:bg-green-50 group-hover:text-green-700 border-none">
+                                                        Réserver
+                                                    </Button>
+                                                </Link>
+                                            )}
                                         </CardFooter>
                                     </Card>
                                 </motion.div>
