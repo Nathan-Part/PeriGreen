@@ -37,7 +37,12 @@ export default function Dashboard() {
   const totalEq         = equipments?.length ?? 0;
   const enAttente       = reservations.filter(r => r.status === 'EN_ATTENTE');
   const loansActifs     = loans?.filter(l => l.status === 'ACTIVE' || l.status === 'EN_COURS').length ?? 0;
-  const loansEnRetard   = loans?.filter(l => l.status === 'OVERDUE' || l.status === 'EN_RETARD') ?? [];
+  const loansEnRetard   = loans?.filter(l => {
+    if (l.status === 'OVERDUE' || l.status === 'EN_RETARD') return true;
+    // Détection côté frontend : non rendu + date d'échéance dépassée
+    if (!l.returnDate && l.dueDate && new Date(l.dueDate) < new Date()) return true;
+    return false;
+  }) ?? [];
   const eqIndispos      = equipments?.filter(e => e.status === 'IN_USE' || e.status === 'MAINTENANCE').length ?? 0;
 
   const kpis = [

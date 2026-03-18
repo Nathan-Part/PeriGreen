@@ -1,7 +1,7 @@
 import { useLoans } from '../hooks/useLoans';
 import { Card, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { Laptop, Calendar, Clock, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Laptop, Calendar, Clock, AlertCircle, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 const getStatusBadge = (status: string) => {
     switch (status) {
@@ -56,6 +56,10 @@ export default function Loans() {
                                         .map((loan) => {
                                             const equipmentName = typeof loan.equipment === 'object' ? loan.equipment?.name : '—';
                                             const borrowerEmail = typeof loan.borrower === 'object' ? loan.borrower?.email : '—';
+                                            // Overdue: not returned + dueDate passed
+                                            const isOverdue = !loan.returnDate && loan.dueDate
+                                                ? new Date(loan.dueDate) < new Date()
+                                                : false;
                                             // Extract initials from email (e.g. "john.doe@..." → "JD")
                                             const initials = borrowerEmail
                                                 .split('@')[0]
@@ -66,7 +70,7 @@ export default function Loans() {
                                                 .join('');
 
                                             return (
-                                                <tr key={loan.id} className="hover:bg-gray-50/50 transition-colors group">
+                                                <tr key={loan.id} className={`transition-colors group ${isOverdue ? 'bg-red-50 hover:bg-red-100 border-l-4 border-l-red-400' : 'hover:bg-gray-50/50'}`}>
                                                     <td className="px-6 py-4">
                                                         <div className="flex items-center gap-3">
                                                             <div className="p-2 bg-gray-100 rounded-lg text-gray-500 group-hover:bg-primary-50 group-hover:text-primary-600 transition-colors">
@@ -100,13 +104,20 @@ export default function Loans() {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <span className="text-sm font-medium text-gray-700">
+                                                        <span className="text-sm font-medium">
                                                             {loan.returnDate ? (
                                                                 <div className="flex items-center gap-1.5 text-green-600">
                                                                     <CheckCircle2 size={14} />
                                                                     {loan.returnDate}
                                                                 </div>
-                                                            ) : '—'}
+                                                            ) : isOverdue ? (
+                                                                <div className="flex items-center gap-1.5 text-red-600 font-semibold">
+                                                                    <AlertTriangle size={14} />
+                                                                    En retard
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-gray-400">—</span>
+                                                            )}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4">
