@@ -33,6 +33,7 @@ export default function Loans() {
                                     <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Matériel</th>
                                     <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Emprunteur</th>
                                     <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Période</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Rendu le</th>
                                     <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Qté</th>
                                     <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Statut</th>
                                 </tr>
@@ -41,7 +42,7 @@ export default function Loans() {
                                 {isLoading ? (
                                     [...Array(5)].map((_, i) => (
                                         <tr key={i} className="animate-pulse">
-                                            <td colSpan={5} className="px-6 py-8 h-16 bg-gray-50/20" />
+                                            <td colSpan={6} className="px-6 py-8 h-16 bg-gray-50/20" />
                                         </tr>
                                     ))
                                 ) : loans && loans.length > 0 ? (
@@ -99,6 +100,16 @@ export default function Loans() {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
+                                                        <span className="text-sm font-medium text-gray-700">
+                                                            {loan.returnDate ? (
+                                                                <div className="flex items-center gap-1.5 text-green-600">
+                                                                    <CheckCircle2 size={14} />
+                                                                    {loan.returnDate}
+                                                                </div>
+                                                            ) : '—'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
                                                         <span className="text-sm font-medium text-gray-700">{loan.quantity}</span>
                                                     </td>
                                                     <td className="px-6 py-4">
@@ -109,7 +120,7 @@ export default function Loans() {
                                         })
                                 ) : (
                                     <tr>
-                                        <td colSpan={5} className="px-6 py-20 text-center">
+                                        <td colSpan={6} className="px-6 py-20 text-center">
                                             <div className="flex flex-col items-center gap-2 text-gray-400">
                                                 <CheckCircle2 size={40} className="text-gray-200" />
                                                 <p className="font-medium">Aucun emprunt enregistré</p>
