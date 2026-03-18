@@ -63,6 +63,14 @@ class LoanController extends AbstractController
         $reservation = $reservationRepo->find($data['reservationId']);
         if (!$reservation) return $this->json(['error' => 'Réservation introuvable'], 404);
 
+        // Vérification du stock si le statut n'est pas déjà TERMINÉ
+        if ($status !== LoanStatus::TERMINE) {
+            if ($equipment->getTotalQuantity() < (int)$data['quantity']) {
+                return $this->json(['error' => 'Stock insuffisant pour créer ce prêt'], 400);
+            }
+            $equipment->setTotalQuantity($equipment->getTotalQuantity() - (int)$data['quantity']);
+        }
+
         $loan = new Loan();
         $loan->setPickupDate(new \DateTimeImmutable($data['pickupDate']));
         $loan->setDueDate(new \DateTimeImmutable($data['dueDate']));
@@ -104,6 +112,24 @@ class LoanController extends AbstractController
         if (isset($data['status'])) {
             $status = LoanStatus::tryFrom($data['status']);
             if (!$status) return $this->json(['error' => 'Statut invalide'], 400);
+            
+            $previousStatus = $loan->getStatus();
+            // Si on passe à TERMINE, on rend les objets au stock
+            if ($status === LoanStatus::TERMINE && $previousStatus !== LoanStatus::TERMINE) {
+                $equipment = $loan->getEquipment();
+                $equipment->setTotalQuantity($equipment->getTotalQuantity() + $loan->getQuantity());
+                
+                // On met la date de retour si elle n'est pas déjà précisée dans la requête
+                if (!$loan->getReturnDate() && !isset($data['returnDate'])) {
+                    $loan->setReturnDate(new \DateTimeImmutable());
+                }
+            }
+            // Si on repasse de TERMINE à autre chose, on retire du stock
+            if ($previousStatus === LoanStatus::TERMINE && $status !== LoanStatus::TERMINE) {
+                $equipment = $loan->getEquipment();
+                $equipment->setTotalQuantity($equipment->getTotalQuantity() - $loan->getQuantity());
+            }
+
             $loan->setStatus($status);
         }
 
@@ -133,6 +159,12 @@ class LoanController extends AbstractController
     public function delete(Loan $loan, EntityManagerInterface $em): JsonResponse
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        // Si le prêt n'était pas encore terminé, on rend les objets au stock (car ils étaient "sortis")
+        if ($loan->getStatus() !== LoanStatus::TERMINE) {
+            $equipment = $loan->getEquipment();
+            $equipment->setTotalQuantity($equipment->getTotalQuantity() + $loan->getQuantity());
+        }
 
         $em->remove($loan);
         $em->flush();

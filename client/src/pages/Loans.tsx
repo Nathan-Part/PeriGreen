@@ -1,21 +1,34 @@
-import { useLoans } from '../hooks/useLoans';
+import { useLoans, useUpdateLoan } from '../hooks/useLoans';
 import { Card, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { Laptop, Calendar, Clock, AlertCircle, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Laptop, Calendar, Clock, AlertCircle, CheckCircle2, AlertTriangle, RotateCcw } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 const getStatusBadge = (status: string) => {
     switch (status) {
-        case 'ACTIVE': return <Badge variant="info">En cours</Badge>;
-        case 'OVERDUE': return <Badge variant="danger">En retard</Badge>;
-        case 'COMPLETED': return <Badge variant="success">Terminé</Badge>;
-        case 'PENDING': return <Badge variant="warning">En attente</Badge>;
-        case 'CANCELLED': return <Badge variant="default">Annulé</Badge>;
+        case 'EN_COURS':       return <Badge variant="info">En cours</Badge>;
+        case 'EN_RETARD':      return <Badge variant="danger">En retard</Badge>;
+        case 'TERMINE':        return <Badge variant="success">Terminé</Badge>;
+        case 'RETOUR_DEMANDE': return <Badge variant="warning">Retour demandé</Badge>;
+        // Legacy/Fallbacks
+        case 'ACTIVE':         return <Badge variant="info">En cours</Badge>;
+        case 'OVERDUE':        return <Badge variant="danger">En retard</Badge>;
+        case 'COMPLETED':      return <Badge variant="success">Terminé</Badge>;
         default: return <Badge variant="default">{status}</Badge>;
     }
 };
 
 export default function Loans() {
     const { data: loans, isLoading } = useLoans();
+    const { user } = useAuth();
+    const { mutate: updateLoan } = useUpdateLoan();
+    const isAdmin = user?.roles.includes('ROLE_ADMIN');
+
+    const handleReturn = (id: number) => {
+        if (window.confirm('Confirmer le retour de ce matériel ?')) {
+            updateLoan({ id, data: { status: 'TERMINE' } });
+        }
+    };
 
     return (
         <div className="space-y-8">
@@ -36,13 +49,14 @@ export default function Loans() {
                                     <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Rendu le</th>
                                     <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Qté</th>
                                     <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Statut</th>
+                                    {isAdmin && <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {isLoading ? (
                                     [...Array(5)].map((_, i) => (
                                         <tr key={i} className="animate-pulse">
-                                            <td colSpan={6} className="px-6 py-8 h-16 bg-gray-50/20" />
+                                            <td colSpan={isAdmin ? 7 : 6} className="px-6 py-8 h-16 bg-gray-50/20" />
                                         </tr>
                                     ))
                                 ) : loans && loans.length > 0 ? (
@@ -126,12 +140,26 @@ export default function Loans() {
                                                     <td className="px-6 py-4">
                                                         {getStatusBadge(loan.status)}
                                                     </td>
+                                                    {isAdmin && (
+                                                        <td className="px-6 py-4 text-right">
+                                                            {loan.status !== 'TERMINE' && (
+                                                                <button
+                                                                    onClick={() => handleReturn(loan.id)}
+                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg text-xs font-bold transition-colors"
+                                                                    title="Marquer comme rendu"
+                                                                >
+                                                                    <RotateCcw size={14} />
+                                                                    Retour
+                                                                </button>
+                                                            )}
+                                                        </td>
+                                                    )}
                                                 </tr>
                                             );
                                         })
                                 ) : (
                                     <tr>
-                                        <td colSpan={6} className="px-6 py-20 text-center">
+                                        <td colSpan={isAdmin ? 7 : 6} className="px-6 py-20 text-center">
                                             <div className="flex flex-col items-center gap-2 text-gray-400">
                                                 <CheckCircle2 size={40} className="text-gray-200" />
                                                 <p className="font-medium">Aucun emprunt enregistré</p>
