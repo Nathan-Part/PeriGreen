@@ -149,7 +149,7 @@ export default function Loans() {
             <div className="flex gap-6 p-4 bg-primary-50/50 rounded-2xl border border-primary-100/50">
                 <div className="flex items-center gap-2 text-xs text-primary-700 font-medium">
                     <AlertCircle size={14} />
-                    <span>Les retards sont signalés automatiquement après 24h de dépassement.</span>
+                    <span>Les retards sont signalés automatiquement le jour de la date d'échéance.</span>
                 </div>
             </div>
         </div>
