@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle2, XCircle, ClipboardList, MessageSquare } from 'lucide-react';
+import { CheckCircle2, XCircle, ClipboardList, MessageSquare, AlertCircle } from 'lucide-react';
 import { useReservations } from '../../hooks/useReservations';
 
 const statutConfig: Record<string, { label: string; color: string }> = {
@@ -20,12 +20,16 @@ function StatutBadge({ status }: { status: string }) {
 }
 
 export default function GestionReservations() {
-  const { reservations, fetchAll, isLoading, updateStatus } = useReservations();
+  const { reservations, fetchAll, isLoading, updateStatus, error } = useReservations();
   const [activeNote, setActiveNote]       = useState<Record<number, string>>({});
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [filterStatut, setFilterStatut]   = useState('TOUS');
 
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  useEffect(() => { 
+    fetchAll(); 
+    // Clear error on mount
+    useReservations.setState({ error: null });
+  }, [fetchAll]);
 
   const filtered = filterStatut === 'TOUS'
     ? reservations
@@ -33,8 +37,12 @@ export default function GestionReservations() {
 
   const handleAction = async (id: number, status: 'VALIDEE' | 'REFUSEE') => {
     setActionLoading(id);
+    // Clear previous error
+    useReservations.setState({ error: null });
     try {
       await updateStatus(id, status, activeNote[id] ?? '');
+    } catch (err) {
+      console.error('Erreur action:', err);
     } finally {
       setActionLoading(null);
     }
@@ -58,6 +66,15 @@ export default function GestionReservations() {
           ))}
         </select>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+          <AlertCircle size={16} />
+          <span className="font-semibold uppercase text-[10px] bg-red-100 px-1.5 py-0.5 rounded mr-1">Erreur</span>
+          {error}
+        </div>
+      )}
 
       {/* Table */}
       <div className="pg-card">

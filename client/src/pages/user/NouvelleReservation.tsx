@@ -26,14 +26,22 @@ export default function NouvelleReservation() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: name === 'quantity' ? Number(value) : value }));
+    // Réinitialiser l'erreur quand l'utilisateur modifie le formulaire
+    useReservations.setState({ error: null });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.equipmentId) return;
-    await create({ equipmentId: Number(form.equipmentId), quantity: form.quantity });
-    setSuccess(true);
-    setTimeout(() => navigate('/espace/reservations'), 1800);
+    
+    try {
+      await create({ equipmentId: Number(form.equipmentId), quantity: form.quantity });
+      setSuccess(true);
+      setTimeout(() => navigate('/espace/reservations'), 1800);
+    } catch (err) {
+      // L'erreur est gérée par le store zustand et affichée dans le composant
+      console.error('Erreur lors de la réservation:', err);
+    }
   };
 
   if (success) {
