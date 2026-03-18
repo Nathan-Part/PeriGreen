@@ -98,6 +98,13 @@ class ReservationController extends AbstractController
             $requester = $targetUser;
         }
 
+        // ── Vérification du stock avant validation directe ──
+        if ($status === StatutReservation::VALIDEE && $this->isGranted('ROLE_ADMIN')) {
+            if ($equipment->getTotalQuantity() < (int) $data['quantity']) {
+                return $this->json(['error' => 'Quantité insuffisante en stock'], 400);
+            }
+        }
+
         $reservation = new Reservation();
         $reservation->setCreatedAt(new \DateTimeImmutable());
         $reservation->setStatus($status->value);
@@ -145,6 +152,9 @@ class ReservationController extends AbstractController
             $loan->setEquipment($reservation->getEquipment());
             $loan->setBorrower($reservation->getRequester());
             $loan->setReservation($reservation);
+
+            // Décrémenter le stock
+            $equipment->setTotalQuantity($equipment->getTotalQuantity() - $reservation->getQuantity());
 
             $em->persist($loan);
             $em->flush();
@@ -217,6 +227,12 @@ class ReservationController extends AbstractController
             && $previousStatus !== StatutReservation::VALIDEE->value
             && $loanRepo->findOneBy(['reservation' => $reservation]) === null
         ) {
+            // Vérifier le stock
+            $equipment = $reservation->getEquipment();
+            if ($equipment->getTotalQuantity() < $reservation->getQuantity()) {
+                return $this->json(['error' => 'Stock insuffisant pour valider cette réservation'], 400);
+            }
+
             // validatedAt = maintenant si pas déjà défini
             if (!$reservation->getValidatedAt()) {
                 $reservation->setValidatedAt(new \DateTimeImmutable());
@@ -241,6 +257,9 @@ class ReservationController extends AbstractController
             $loan->setEquipment($reservation->getEquipment());
             $loan->setBorrower($reservation->getRequester());
             $loan->setReservation($reservation);
+
+            // Décrémenter le stock
+            $equipment->setTotalQuantity($equipment->getTotalQuantity() - $reservation->getQuantity());
 
             $em->persist($loan);
         }
