@@ -87,6 +87,11 @@ class ReservationController extends AbstractController
         $equipment = $equipmentRepo->find($data['equipmentId']);
         if (!$equipment) return $this->json(['error' => 'Équipement introuvable'], 404);
 
+        // ── Vérification immédiate du stock dés la demande ──
+        if ($equipment->getTotalQuantity() < (int) $data['quantity']) {
+            return $this->json(['error' => 'stock insuffisant'], 400);
+        }
+
         /** @var \App\Entity\User $requester */
         $requester = $this->getUser();
         if (!$requester) return $this->json(['error' => 'Utilisateur introuvable ou non authentifié'], 401);
@@ -96,13 +101,6 @@ class ReservationController extends AbstractController
             $targetUser = $userRepo->find($data['requesterId']);
             if (!$targetUser) return $this->json(['error' => 'Utilisateur cible introuvable'], 404);
             $requester = $targetUser;
-        }
-
-        // ── Vérification du stock avant validation directe ──
-        if ($status === StatutReservation::VALIDEE && $this->isGranted('ROLE_ADMIN')) {
-            if ($equipment->getTotalQuantity() < (int) $data['quantity']) {
-                return $this->json(['error' => 'Quantité insuffisante en stock'], 400);
-            }
         }
 
         $reservation = new Reservation();
@@ -186,7 +184,13 @@ class ReservationController extends AbstractController
             return $this->json(['error' => 'Vous ne pouvez plus modifier cette réservation.'], 403);
         }
 
-        if (isset($data['quantity']))    $reservation->setQuantity((int) $data['quantity']);
+        if (isset($data['quantity'])) {
+            $newQuantity = (int) $data['quantity'];
+            if ($reservation->getEquipment()->getTotalQuantity() < $newQuantity) {
+                return $this->json(['error' => 'stock insuffisant'], 400);
+            }
+            $reservation->setQuantity($newQuantity);
+        }
 
         $previousStatus = $reservation->getStatus();
 
@@ -230,7 +234,7 @@ class ReservationController extends AbstractController
             // Vérifier le stock
             $equipment = $reservation->getEquipment();
             if ($equipment->getTotalQuantity() < $reservation->getQuantity()) {
-                return $this->json(['error' => 'Stock insuffisant pour valider cette réservation'], 400);
+                return $this->json(['error' => 'stock insuffisant'], 400);
             }
 
             // validatedAt = maintenant si pas déjà défini
