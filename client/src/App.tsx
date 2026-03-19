@@ -19,6 +19,7 @@ const GestionReservations = lazy(() => import("./pages/admin/GestionReservations
 const TableauDeBordUser   = lazy(() => import("./pages/user/TableauDeBordUser"));
 const MesReservations     = lazy(() => import("./pages/user/MesReservations"));
 const NouvelleReservation = lazy(() => import("./pages/user/NouvelleReservation"));
+const DetailReservation   = lazy(() => import("./pages/user/DetailReservation"));
 
 // ─── Pages publiques ────────────────────────────────────────────────────────
 const Home = lazy(() => import("./pages/Home"));
@@ -71,6 +72,7 @@ function App() {
             <Route path="inventaire"               element={<Inventory />} />
             <Route path="inventaire/:id"           element={<EquipmentDetail />} />
             <Route path="reservations"             element={<MesReservations />} />
+            <Route path="reservations/:id"         element={<DetailReservation />} />
             <Route path="reservations/nouvelle"    element={<NouvelleReservation />} />
           </Route>
 

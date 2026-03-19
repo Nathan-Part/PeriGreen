@@ -181,6 +181,15 @@ export interface Loan {
   };
 }
 
+export interface LoanSummary {
+  id: number;
+  pickupDate: string;
+  dueDate: string;
+  returnDate: string | null;
+  status: 'EN_COURS' | 'RETOUR_DEMANDE' | 'TERMINE' | 'EN_RETARD';
+  quantity: number;
+}
+
 export const getLoans = async (): Promise<Loan[]> => {
   return fetchApi<Loan[]>('/api/loans');
 };
@@ -238,6 +247,7 @@ export interface Reservation {
     id: number;
     email: string;
   };
+  loan?: LoanSummary | null;
 }
 
 export const getReservations = async (): Promise<Reservation[]> => {
@@ -281,6 +291,12 @@ export const getMyReservations = async (): Promise<Reservation[]> => {
 
 export const cancelReservation = async (id: number): Promise<Reservation> => {
   return fetchApi<Reservation>(`/api/reservations/${id}/annuler`, {
+    method: 'PATCH',
+  });
+};
+
+export const returnLoan = async (loanId: number): Promise<LoanSummary> => {
+  return fetchApi<LoanSummary>(`/api/loans/${loanId}/retourner`, {
     method: 'PATCH',
   });
 };

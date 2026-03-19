@@ -20,6 +20,10 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 #[Route('/api/reservations', name: 'api_reservations_')]
 class ReservationController extends AbstractController
 {
+    public function __construct(
+        private readonly LoanRepository $loanRepo
+    ) {}
+
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(ReservationRepository $repo): JsonResponse
     {
@@ -30,7 +34,10 @@ class ReservationController extends AbstractController
             $user = $this->getUser();
             $reservations = $repo->findBy(['requester' => $user]);
         }
-        return $this->json(array_map(fn($r) => $this->format($r), $reservations));
+        return $this->json(array_map(
+            fn($r) => $this->format($r, $this->loanRepo->findOneBy(['reservation' => $r])),
+            $reservations
+        ));
     }
 
     #[Route('/me', name: 'my_reservations', methods: ['GET'])]
@@ -43,7 +50,10 @@ class ReservationController extends AbstractController
         }
 
         $reservations = $repo->findBy(['requester' => $user]);
-        return $this->json(array_map(fn($r) => $this->format($r), $reservations));
+        return $this->json(array_map(
+            fn($r) => $this->format($r, $this->loanRepo->findOneBy(['reservation' => $r])),
+            $reservations
+        ));
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
@@ -53,7 +63,8 @@ class ReservationController extends AbstractController
         if (!$this->isGranted('ROLE_ADMIN') && $reservation->getRequester() !== $user) {
             throw new AccessDeniedException('Vous ne pouvez voir que vos propres réservations.');
         }
-        return $this->json($this->format($reservation));
+        $loan = $this->loanRepo->findOneBy(['reservation' => $reservation]);
+        return $this->json($this->format($reservation, $loan));
     }
 
     #[Route('', name: 'create', methods: ['POST'])]
@@ -158,7 +169,8 @@ class ReservationController extends AbstractController
             $em->flush();
         }
 
-        return $this->json($this->format($reservation), 201);
+        $loan = $this->loanRepo->findOneBy(['reservation' => $reservation]);
+        return $this->json($this->format($reservation, $loan), 201);
     }
 
     #[Route('/{id}', name: 'update', methods: ['PUT'])]
@@ -269,7 +281,8 @@ class ReservationController extends AbstractController
         }
 
         $em->flush();
-        return $this->json($this->format($reservation));
+        $loan = $this->loanRepo->findOneBy(['reservation' => $reservation]);
+        return $this->json($this->format($reservation, $loan));
     }
 
     #[Route('/{id}/annuler', name: 'cancel', methods: ['PATCH'])]
@@ -295,7 +308,8 @@ class ReservationController extends AbstractController
         $reservation->setStatus(StatutReservation::ANNULEE->value);
         $em->flush();
 
-        return $this->json($this->format($reservation));
+        $loan = $this->loanRepo->findOneBy(['reservation' => $reservation]);
+        return $this->json($this->format($reservation, $loan));
     }
 
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
@@ -308,7 +322,7 @@ class ReservationController extends AbstractController
         return $this->json(['message' => 'Réservation supprimée'], 200);
     }
 
-    private function format(Reservation $r): array
+    private function format(Reservation $r, ?Loan $loan = null): array
     {
         return [
             'id'           => $r->getId(),
@@ -328,6 +342,14 @@ class ReservationController extends AbstractController
             'approver'     => $r->getApprover() ? [
                 'id'    => $r->getApprover()->getId(),
                 'email' => $r->getApprover()->getEmail(),
+            ] : null,
+            'loan'         => $loan ? [
+                'id'         => $loan->getId(),
+                'pickupDate' => $loan->getPickupDate()?->format('Y-m-d'),
+                'dueDate'    => $loan->getDueDate()?->format('Y-m-d'),
+                'returnDate' => $loan->getReturnDate()?->format('Y-m-d'),
+                'status'     => $loan->getStatus()?->value,
+                'quantity'   => $loan->getQuantity(),
             ] : null,
         ];
     }
