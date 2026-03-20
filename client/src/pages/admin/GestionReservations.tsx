@@ -4,10 +4,10 @@ import { useReservations } from '../../hooks/useReservations';
 
 const statutConfig: Record<string, { label: string; color: string }> = {
   EN_ATTENTE: { label: 'En attente', color: 'badge-warning' },
-  VALIDEE:    { label: 'Validée',    color: 'badge-success' },
-  REFUSEE:    { label: 'Refusée',    color: 'badge-danger' },
-  ANNULEE:    { label: 'Annulée',    color: 'badge-default' },
-  EXPIREE:    { label: 'Expirée',    color: 'badge-warning' },
+  VALIDEE: { label: 'Validée', color: 'badge-success' },
+  REFUSEE: { label: 'Refusée', color: 'badge-danger' },
+  ANNULEE: { label: 'Annulée', color: 'badge-default' },
+  EXPIREE: { label: 'Expirée', color: 'badge-warning' },
 };
 
 function StatutBadge({ status }: { status: string }) {
@@ -21,19 +21,22 @@ function StatutBadge({ status }: { status: string }) {
 
 export default function GestionReservations() {
   const { reservations, fetchAll, isLoading, updateStatus, error } = useReservations();
-  const [activeNote, setActiveNote]       = useState<Record<number, string>>({});
+  const [activeNote, setActiveNote] = useState<Record<number, string>>({});
   const [actionLoading, setActionLoading] = useState<number | null>(null);
-  const [filterStatut, setFilterStatut]   = useState('TOUS');
+  const [filterStatut, setFilterStatut] = useState('TOUS');
 
-  useEffect(() => { 
-    fetchAll(); 
+  useEffect(() => {
+    fetchAll();
     // Clear error on mount
     useReservations.setState({ error: null });
   }, [fetchAll]);
 
+  // Tri par ID décroissant (plus récentes en premier)
+  const sortedReservations = [...reservations].sort((a, b) => b.id - a.id);
+
   const filtered = filterStatut === 'TOUS'
-    ? reservations
-    : reservations.filter((r) => r.status === filterStatut);
+    ? sortedReservations
+    : sortedReservations.filter((r) => r.status === filterStatut);
 
   const handleAction = async (id: number, status: 'VALIDEE' | 'REFUSEE') => {
     setActionLoading(id);
