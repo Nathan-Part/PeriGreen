@@ -297,3 +297,16 @@ export interface User {
 export const getUsers = async (): Promise<User[]> => {
   return fetchApi<User[]>('/api/users');
 };
+
+export const updateUser = async (id: number, data: Partial<User>) => {
+  return fetchApi<User>(`/api/users/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+export const deleteUser = async (id: number) => {
+  return fetchApi<{ message: string }>(`/api/users/${id}`, {
+    method: 'DELETE',
+  });
+};

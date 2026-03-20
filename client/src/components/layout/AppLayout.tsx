@@ -15,6 +15,7 @@ const adminNav = [
   { label: 'Inventaire',       href: '/dashboard/inventory',    icon: Laptop },
   { label: 'Emprunts',         href: '/dashboard/loans',        icon: Archive },
   { label: 'Réservations',     href: '/dashboard/reservations', icon: ClipboardList },
+  { label: 'Utilisateurs',     href: '/dashboard/users',        icon: Users },
   { label: 'Statistiques',     href: '/dashboard/stats',        icon: BarChart3 },
 ];
 
