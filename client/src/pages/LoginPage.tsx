@@ -12,10 +12,15 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(email, password);
-      navigate('/dashboard');
+      const user = await login(email, password);
+      // Redirection intelligente selon le rôle
+      if (user.roles?.includes('ROLE_ADMIN')) {
+        navigate('/dashboard');
+      } else {
+        navigate('/espace');
+      }
     } catch {
-      // Error is handled by useAuth
+      // L'erreur est gérée par useAuth
     }
   };
 
@@ -87,7 +92,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-perigreen-600 text-white py-3 rounded-xl font-bold text-lg hover:bg-perigreen-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-perigreen-200"
+              className="btn-primary w-full py-3 text-lg"
             >
               {isLoading ? 'Connexion...' : 'Se connecter'}
             </button>

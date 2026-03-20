@@ -1,18 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Leaf, Menu, X } from 'lucide-react';
+import { Leaf, Menu, X, User, LogIn, LayoutDashboard } from 'lucide-react';
 import { cn } from '../../lib/utils';
-
-const navItems = [
-    { label: 'Accueil', href: '#top' },
-    { label: 'Catalogue', href: '#features' },
-    { label: 'Inscription', href: '#signup' },
-    { label: 'Espace étudiant', href: '#student-space' },
-    { label: 'Espace admin', href: '#admin-space' },
-];
+import { useAuth } from '../../hooks/useAuth';
 
 export function PublicNavbar() {
     const [isOpen, setIsOpen] = useState(false);
+    const { isAuthenticated, user } = useAuth();
+    const isAdmin = user?.roles?.includes('ROLE_ADMIN');
 
     const closeMenu = () => setIsOpen(false);
 
@@ -27,21 +22,35 @@ export function PublicNavbar() {
                 </Link>
 
                 <nav className="hidden items-center gap-8 md:flex">
-                    {navItems.map((item) => (
-                        <a
-                            key={item.label}
-                            href={item.href}
-                            className="text-sm font-medium text-[#1b5e4b] transition-colors hover:text-[#0f3d2e]"
+                    <a href="#features" className="text-sm font-medium text-[#1b5e4b] transition-colors hover:text-[#0f3d2e]">
+                        Catalogue
+                    </a>
+                    
+                    {!isAuthenticated ? (
+                        <>
+                            <Link
+                                to="/register"
+                                className="text-sm font-medium text-[#1b5e4b] transition-colors hover:text-[#0f3d2e]"
+                            >
+                                Inscription
+                            </Link>
+                            <Link
+                                to="/login"
+                                className="btn-primary px-5 py-2 text-sm"
+                            >
+                                <LogIn size={16} />
+                                Se connecter
+                            </Link>
+                        </>
+                    ) : (
+                        <Link
+                            to={isAdmin ? "/dashboard" : "/espace"}
+                            className="btn-primary px-5 py-2 text-sm"
                         >
-                            {item.label}
-                        </a>
-                    ))}
-                    <Link
-                        to="/dashboard"
-                        className="inline-flex items-center justify-center rounded-full bg-[#0f3d2e] px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1b5e4b]"
-                    >
-                        Dashboard
-                    </Link>
+                            {isAdmin ? <LayoutDashboard size={16} /> : <User size={16} />}
+                            {isAdmin ? 'Administration' : 'Mon Espace'}
+                        </Link>
+                    )}
                 </nav>
 
                 <button
@@ -57,23 +66,42 @@ export function PublicNavbar() {
 
             <div className={cn('border-t border-emerald-950/10 bg-[#e6f5ef] md:hidden', isOpen ? 'block' : 'hidden')}>
                 <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4 sm:px-6">
-                    {navItems.map((item) => (
-                        <a
-                            key={item.label}
-                            href={item.href}
-                            className="rounded-2xl px-4 py-3 text-sm font-medium text-[#1b5e4b] transition-colors hover:bg-white/60 hover:text-[#0f3d2e]"
-                            onClick={closeMenu}
-                        >
-                            {item.label}
-                        </a>
-                    ))}
-                    <Link
-                        to="/dashboard"
-                        className="mt-2 rounded-full bg-[#0f3d2e] px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-[#1b5e4b]"
+                    <a
+                        href="#features"
+                        className="rounded-2xl px-4 py-3 text-sm font-medium text-[#1b5e4b] transition-colors hover:bg-white/60 hover:text-[#0f3d2e]"
                         onClick={closeMenu}
                     >
-                        Dashboard
-                    </Link>
+                        Catalogue
+                    </a>
+                    
+                    {!isAuthenticated ? (
+                        <>
+                            <Link
+                                to="/register"
+                                className="rounded-2xl px-4 py-3 text-sm font-medium text-[#1b5e4b] transition-colors hover:bg-white/60 hover:text-[#0f3d2e]"
+                                onClick={closeMenu}
+                            >
+                                Inscription
+                            </Link>
+                            <Link
+                                to="/login"
+                                className="mt-2 btn-primary w-full py-3"
+                                onClick={closeMenu}
+                            >
+                                <LogIn size={18} />
+                                Se connecter
+                            </Link>
+                        </>
+                    ) : (
+                        <Link
+                            to={isAdmin ? "/dashboard" : "/espace"}
+                            className="mt-2 btn-primary w-full py-3"
+                            onClick={closeMenu}
+                        >
+                            {isAdmin ? <LayoutDashboard size={18} /> : <User size={18} />}
+                            {isAdmin ? 'Administration' : 'Mon Espace'}
+                        </Link>
+                    )}
                 </nav>
             </div>
         </header>
