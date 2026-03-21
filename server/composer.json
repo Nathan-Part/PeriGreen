@@ -1,4 +1,6 @@
 {
+    "name": "nathan-part/perigreen-server",
+    "description": "Backend for PeriGreen project",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
