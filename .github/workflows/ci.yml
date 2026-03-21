@@ -9,6 +9,19 @@ on:
 jobs:
   php:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./server
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: perigreen
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       - name: Checkout
@@ -20,6 +33,7 @@ jobs:
           php-version: "8.2"
           tools: composer:v2
           coverage: none
+          extensions: pdo_mysql, intl, zip
 
       - name: Validate composer.json
         run: composer validate --no-interaction --strict
@@ -29,7 +43,31 @@ jobs:
 
       - name: Symfony info
         run: php bin/console about --no-interaction
+        env:
+          DATABASE_URL: "mysql://root:root@127.0.0.1:3306/perigreen?serverVersion=8.0.32"
 
-      # Uncomment once you have PHPUnit configured:
-      # - name: Run tests
-      #   run: php bin/phpunit
+  node:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: './client/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run type-check || npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint

@@ -14,6 +14,7 @@ const EquipmentDetail     = lazy(() => import("./pages/EquipmentDetail"));
 const Loans               = lazy(() => import("./pages/Loans"));
 const Stats               = lazy(() => import("./pages/Stats"));
 const GestionReservations = lazy(() => import("./pages/admin/GestionReservations"));
+const ManageUsers         = lazy(() => import("./pages/admin/ManageUsers"));
 
 // ─── Pages User ─────────────────────────────────────────────────────────────
 const TableauDeBordUser   = lazy(() => import("./pages/user/TableauDeBordUser"));
@@ -60,6 +61,7 @@ function App() {
             <Route path="loans"            element={<Loans />} />
             <Route path="stats"            element={<Stats />} />
             <Route path="reservations"     element={<GestionReservations />} />
+            <Route path="users"            element={<ManageUsers />} />
           </Route>
 
           {/* ── Espace Utilisateur ─────────────────────────────── */}
