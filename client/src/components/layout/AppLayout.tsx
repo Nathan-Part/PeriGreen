@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Laptop, Archive, BarChart3,
-  Menu, LogOut, ClipboardList, Users, CalendarCheck
+  Menu, LogOut, ClipboardList, Users, CalendarCheck, UserCircle2
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { motion } from 'framer-motion';
@@ -17,12 +17,14 @@ const adminNav = [
   { label: 'Réservations',     href: '/dashboard/reservations', icon: ClipboardList },
   { label: 'Utilisateurs',     href: '/dashboard/users',        icon: Users },
   { label: 'Statistiques',     href: '/dashboard/stats',        icon: BarChart3 },
+  { label: 'Mon compte',       href: '/dashboard/mon-compte',   icon: UserCircle2 },
 ];
 
 const userNav = [
   { label: 'Tableau de bord',      href: '/espace',                          icon: LayoutDashboard },
   { label: 'Inventaire',           href: '/espace/inventaire',               icon: Laptop },
   { label: 'Mes réservations',     href: '/espace/reservations',             icon: CalendarCheck },
+  { label: 'Mon compte',           href: '/espace/mon-compte',               icon: UserCircle2 },
 ];
 
 // ─── Composant ───────────────────────────────────────────────────────────────

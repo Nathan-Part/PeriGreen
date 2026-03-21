@@ -93,8 +93,31 @@ export const register = async (userData: {
   });
 };
 
+export interface AuthUser {
+  id: number;
+  email: string;
+  fullName: string;
+  universityId: string;
+  role: string;
+  roles: string[];
+  createdAt?: string;
+}
+
 export const getCurrentUser = async () => {
-  return fetchApi<{ id: number; email: string; roles: string[] }>('/auth/me');
+  return fetchApi<AuthUser>('/auth/me');
+};
+
+export const updateMyProfile = async (data: {
+  email?: string;
+  fullName?: string;
+  universityId?: string;
+  currentPassword?: string;
+  password?: string;
+}) => {
+  return fetchApi<AuthUser>('/api/users/me', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
 };
 
 export const logout = () => {
@@ -308,6 +331,8 @@ export interface User {
   fullName: string;
   universityId: string;
   role: string;
+  roles?: string[];
+  createdAt?: string;
 }
 
 export const getUsers = async (): Promise<User[]> => {

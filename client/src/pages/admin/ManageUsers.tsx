@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Users, Search, Filter, MoreVertical, Shield, 
+  Users, Search, Filter, Shield, 
   ShieldCheck, Trash2, UserPlus, Mail, Fingerprint,
-  Calendar
 } from 'lucide-react';
 import { 
   getUsers, updateUser, deleteUser, type User 
