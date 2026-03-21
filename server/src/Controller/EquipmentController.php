@@ -15,18 +15,30 @@ use Symfony\Component\Routing\Attribute\Route;
 class EquipmentController extends AbstractController
 {
     #[Route('', name: 'list', methods: ['GET'])]
-    public function list(EquipmentRepository $repo): JsonResponse
+    public function list(Request $request, EquipmentRepository $repo): JsonResponse
     {
         $equipments = $repo->findAll();
         $data = array_map(fn($e) => $this->format($e), $equipments);
 
-        return $this->json($data);
+        $response = new JsonResponse($data);
+        $response->setEtag(md5(serialize($data)));
+        $response->setPublic();
+        $response->isNotModified($request);
+
+        return $response;
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(Equipment $equipment): JsonResponse
+    public function show(Request $request, Equipment $equipment): JsonResponse
     {
-        return $this->json($this->format($equipment));
+        $data = $this->format($equipment);
+        
+        $response = new JsonResponse($data);
+        $response->setEtag(md5(serialize($data)));
+        $response->setPublic();
+        $response->isNotModified($request);
+
+        return $response;
     }
 
     #[Route('', name: 'create', methods: ['POST'])]

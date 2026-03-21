@@ -56,18 +56,26 @@ final class AuthController extends AbstractController
     }
 
     #[Route('/me', name: 'app_auth_me', methods: ['GET'])]
-    public function me(): JsonResponse
+    public function me(Request $request): JsonResponse
     {
         $user = $this->getUser();
         if (!$user) {
             return $this->json(['message' => 'Unauthorized'], 401);
         }
-        return $this->json([
+
+        $data = [
             'id'    => $user->getId(),
             'email' => $user->getUserIdentifier(),
             'roles' => $user->getRoles(),
             'fullName' => method_exists($user, 'getFullName') ? $user->getFullName() : null,
             'universityId' => method_exists($user, 'getUniversityId') ? $user->getUniversityId() : null,
-        ]);
+        ];
+
+        $response = new JsonResponse($data);
+        $response->setEtag(md5(serialize($data)));
+        $response->setPrivate(); // Important for user-specific data
+        $response->isNotModified($request);
+
+        return $response;
     }
 }
