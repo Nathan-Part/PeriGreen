@@ -16,28 +16,22 @@ class LoanRepository extends ServiceEntityRepository
         parent::__construct($registry, Loan::class);
     }
 
-//    /**
-//     * @return Loan[] Returns an array of Loan objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('l')
-//            ->andWhere('l.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('l.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?Loan
-//    {
-//        return $this->createQueryBuilder('l')
-//            ->andWhere('l.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * Récupère tous les emprunts avec equipment, borrower et reservation
+     * pré-chargés en UNE SEULE requête SQL (évite le problème N+1).
+     *
+     * @return Loan[]
+     */
+    public function findAllWithJoins(): array
+    {
+        return $this->createQueryBuilder('l')
+            ->addSelect('e', 'b', 'r')
+            ->leftJoin('l.equipment', 'e')
+            ->leftJoin('l.borrower', 'b')
+            ->leftJoin('l.reservation', 'r')
+            ->orderBy('l.pickupDate', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }
+

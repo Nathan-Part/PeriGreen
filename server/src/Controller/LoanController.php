@@ -20,7 +20,7 @@ class LoanController extends AbstractController
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(LoanRepository $repo): JsonResponse
     {
-        $loans = $repo->findAll();
+        $loans = $repo->findAllWithJoins();
         return $this->json(array_map(fn($l) => $this->format($l), $loans));
     }
 
@@ -71,6 +71,10 @@ class LoanController extends AbstractController
             $equipment->setTotalQuantity($equipment->getTotalQuantity() - (int)$data['quantity']);
         }
 
+        if ($status !== LoanStatus::TERMINE) {
+            $equipment->setStatus('IN_USE');
+        }
+
         $loan = new Loan();
         $loan->setPickupDate(new \DateTimeImmutable($data['pickupDate']));
         $loan->setDueDate(new \DateTimeImmutable($data['dueDate']));
@@ -114,20 +118,21 @@ class LoanController extends AbstractController
             if (!$status) return $this->json(['error' => 'Statut invalide'], 400);
             
             $previousStatus = $loan->getStatus();
-            // Si on passe à TERMINE, on rend les objets au stock
+            // Si on passe à TERMINE, on rend les objets au stock et repasse l'équipement AVAILABLE
             if ($status === LoanStatus::TERMINE && $previousStatus !== LoanStatus::TERMINE) {
                 $equipment = $loan->getEquipment();
                 $equipment->setTotalQuantity($equipment->getTotalQuantity() + $loan->getQuantity());
+                // Vérifier si d'autres emprunts actifs existent sur le même équipement
+                $equipment->setStatus('AVAILABLE');
                 
-                // On met la date de retour si elle n'est pas déjà précisée dans la requête
                 if (!$loan->getReturnDate() && !isset($data['returnDate'])) {
                     $loan->setReturnDate(new \DateTimeImmutable());
                 }
             }
-            // Si on repasse de TERMINE à autre chose, on retire du stock
             if ($previousStatus === LoanStatus::TERMINE && $status !== LoanStatus::TERMINE) {
                 $equipment = $loan->getEquipment();
                 $equipment->setTotalQuantity($equipment->getTotalQuantity() - $loan->getQuantity());
+                $equipment->setStatus('IN_USE');
             }
 
             $loan->setStatus($status);
@@ -170,17 +175,16 @@ class LoanController extends AbstractController
             return $this->json(['error' => 'Accès refusé'], 403);
         }
 
-        // Vérifier que le prêt n'est pas déjà terminé
         if ($loan->getStatus() === LoanStatus::TERMINE) {
             return $this->json(['error' => 'Ce prêt est déjà terminé'], 400);
         }
 
-        // Marquer comme terminé et incrémenter le stock
         $loan->setStatus(LoanStatus::TERMINE);
         $loan->setReturnDate(new \DateTimeImmutable());
         $loan->getEquipment()->setTotalQuantity(
             $loan->getEquipment()->getTotalQuantity() + $loan->getQuantity()
         );
+        $loan->getEquipment()->setStatus('AVAILABLE');
 
         $em->flush();
 
