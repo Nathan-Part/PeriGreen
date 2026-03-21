@@ -1,21 +1,23 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { login, logout as apiLogout, getCurrentUser, removeToken } from '../services/api';
-
-interface User {
-  id: number;
-  email: string;
-  roles: string[];
-}
+import {
+  login,
+  logout as apiLogout,
+  getCurrentUser,
+  removeToken,
+  setStoredUser,
+  type AuthUser,
+} from '../services/api';
 
 interface AuthState {
-  user: User | null;
+  user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<User>;
+  login: (email: string, password: string) => Promise<AuthUser>;
   logout: () => void;
   checkAuth: () => Promise<void>;
+  setUser: (user: AuthUser) => void;
 }
 
 export const useAuth = create<AuthState>()(
@@ -41,6 +43,11 @@ export const useAuth = create<AuthState>()(
       logout: () => {
         apiLogout();
         set({ user: null, isAuthenticated: false, error: null });
+      },
+
+      setUser: (user) => {
+        setStoredUser(user);
+        set({ user, isAuthenticated: true, error: null });
       },
 
       checkAuth: async () => {

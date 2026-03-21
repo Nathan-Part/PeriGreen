@@ -15,6 +15,7 @@ const Loans               = lazy(() => import("./pages/Loans"));
 const Stats               = lazy(() => import("./pages/Stats"));
 const GestionReservations = lazy(() => import("./pages/admin/GestionReservations"));
 const ManageUsers         = lazy(() => import("./pages/admin/ManageUsers"));
+const MyProfile           = lazy(() => import("./pages/MyProfile"));
 
 // ─── Pages User ─────────────────────────────────────────────────────────────
 const TableauDeBordUser   = lazy(() => import("./pages/user/TableauDeBordUser"));
@@ -63,6 +64,7 @@ function App() {
             <Route path="stats"            element={<Stats />} />
             <Route path="reservations"     element={<GestionReservations />} />
             <Route path="users"            element={<ManageUsers />} />
+            <Route path="mon-compte"       element={<MyProfile />} />
           </Route>
 
           {/* ── Espace Utilisateur ─────────────────────────────── */}
@@ -76,6 +78,7 @@ function App() {
             <Route path="reservations"             element={<MesReservations />} />
             <Route path="reservations/:id"         element={<DetailReservation />} />
             <Route path="reservations/nouvelle"    element={<NouvelleReservation />} />
+            <Route path="mon-compte"               element={<MyProfile />} />
           </Route>
 
           {/* ── Redirections legacy ────────────────────────────── */}
