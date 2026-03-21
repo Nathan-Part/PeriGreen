@@ -144,17 +144,22 @@ export const AppLayout = () => {
 
         {/* Mobile nav overlay */}
         {mobileOpen && (
-          <div className="md:hidden absolute inset-0 z-50 bg-black/40" onClick={() => setMobileOpen(false)}>
+          <div className="md:hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm" onClick={() => setMobileOpen(false)}>
             <motion.nav
-              initial={{ x: -260 }}
+              initial={{ x: -280 }}
               animate={{ x: 0 }}
-              className="w-64 bg-white h-full flex flex-col shadow-xl"
+              exit={{ x: -280 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="w-72 bg-white h-full flex flex-col shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="h-16 flex items-center px-6 border-b border-gray-100">
+              {/* Header - Logo */}
+              <div className="h-16 flex items-center px-6 border-b border-gray-100 shrink-0">
                 <span className="text-xl font-bold text-green-600">Peri<span className="text-gray-900">Green</span></span>
               </div>
-              <nav className="flex-1 px-3 py-4 space-y-0.5">
+
+              {/* Navigation scrollable */}
+              <div className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
                 {navigation.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.href);
@@ -173,7 +178,29 @@ export const AppLayout = () => {
                     </Link>
                   );
                 })}
-              </nav>
+              </div>
+
+              {/* Footer utilisateur - toujours visible en bas */}
+              <div className="p-4 border-t border-gray-100 shrink-0 bg-gray-50/50">
+                <div className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-gray-100 transition-colors">
+                  <div className="h-8 w-8 rounded-full bg-green-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                    {initials}
+                  </div>
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <span className="text-sm font-semibold text-gray-900 truncate">
+                      {user?.email?.split('@')[0] ?? 'Utilisateur'}
+                    </span>
+                    <span className="text-xs text-gray-400 truncate">{roleLabel}</span>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
+                    title="Déconnexion"
+                  >
+                    <LogOut size={16} />
+                  </button>
+                </div>
+              </div>
             </motion.nav>
           </div>
         )}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CalendarCheck, PlusCircle, Hourglass, CheckCircle2, XCircle, Clock, Ban } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
 import { useReservations } from '../../hooks/useReservations';
 
@@ -70,8 +71,100 @@ export default function MesReservations() {
         </div>
       )}
 
-      {/* Table */}
-      <div className="pg-card">
+      {/* Mobile Card View */}
+      <div className="grid grid-cols-1 md:hidden gap-4">
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm animate-pulse space-y-4" />
+          ))
+        ) : reservations.length === 0 ? (
+          <div className="bg-white p-8 rounded-2xl border border-gray-100 text-center">
+            <CalendarCheck size={40} className="text-gray-200 mx-auto mb-3" />
+            <p className="text-gray-400 text-sm">Aucune réservation trouvée.</p>
+          </div>
+        ) : (
+          reservations.map((r) => {
+            const dateRetour = (r.status === 'VALIDEE' && r.validatedAt)
+              ? new Date(r.validatedAt).toLocaleDateString('fr-FR')
+              : '—';
+            const isConfirming = confirmId === r.id;
+            const isCanceling = cancelingId === r.id;
+
+            return (
+              <motion.div
+                key={r.id}
+                layout
+                className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-4"
+              >
+                {/* Header: Equipment + Status */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 truncate">{r.equipment?.name ?? '—'}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Qté: {r.quantity}</p>
+                  </div>
+                  <StatutBadge status={r.status} />
+                </div>
+
+                {/* Info Grid */}
+                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-50">
+                  <div>
+                    <span className="text-[10px] text-gray-400 uppercase font-bold">Demandée le</span>
+                    <p className="text-sm font-medium text-gray-700">
+                      {r.createdAt ? new Date(r.createdAt).toLocaleDateString('fr-FR') : '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-gray-400 uppercase font-bold">Date retour</span>
+                    <p className="text-sm font-medium text-gray-700">{dateRetour}</p>
+                  </div>
+                </div>
+
+                {/* Note */}
+                {r.decisionNote && r.decisionNote !== '—' && (
+                  <div className="pt-3 border-t border-gray-50">
+                    <span className="text-xs text-gray-400 italic">Note: {r.decisionNote}</span>
+                  </div>
+                )}
+
+                {/* Actions */}
+                {r.status === 'EN_ATTENTE' ? (
+                  <div className="pt-3 border-t border-gray-50">
+                    {isConfirming ? (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleCancel(r.id)}
+                          disabled={isCanceling}
+                          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-60"
+                        >
+                          {isCanceling ? 'Annulation…' : 'Confirmer'}
+                        </button>
+                        <button
+                          onClick={() => setConfirmId(null)}
+                          disabled={isCanceling}
+                          className="flex-1 px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                        >
+                          Retour
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmId(r.id)}
+                        className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
+                      >
+                        <Ban size={13} />
+                        Annuler la réservation
+                      </button>
+                    )}
+                  </div>
+                ) : null}
+              </motion.div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block pg-card">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>

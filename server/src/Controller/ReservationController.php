@@ -25,7 +25,7 @@ class ReservationController extends AbstractController
     ) {}
 
     #[Route('', name: 'list', methods: ['GET'])]
-    public function list(ReservationRepository $repo): JsonResponse
+    public function list(Request $request, ReservationRepository $repo): JsonResponse
     {
         if ($this->isGranted('ROLE_ADMIN')) {
             $reservations = $repo->findAll();
@@ -41,7 +41,7 @@ class ReservationController extends AbstractController
     }
 
     #[Route('/me', name: 'my_reservations', methods: ['GET'])]
-    public function getMyReservations(ReservationRepository $repo): JsonResponse
+    public function getMyReservations(Request $request, ReservationRepository $repo): JsonResponse
     {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
@@ -57,7 +57,7 @@ class ReservationController extends AbstractController
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(Reservation $reservation): JsonResponse
+    public function show(Request $request, Reservation $reservation): JsonResponse
     {
         $user = $this->getUser();
         if (!$this->isGranted('ROLE_ADMIN') && $reservation->getRequester() !== $user) {

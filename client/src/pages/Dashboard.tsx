@@ -62,7 +62,7 @@ export default function Dashboard() {
       </motion.div>
 
       {/* KPIs */}
-      <motion.div variants={item} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <motion.div variants={item} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((kpi) => (
           <Link key={kpi.label} to={kpi.link}>
             <div className="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
@@ -78,7 +78,7 @@ export default function Dashboard() {
         ))}
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
         {/* Réservations en attente */}
         <motion.div variants={item} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -169,22 +169,22 @@ export default function Dashboard() {
       {/* Actions rapides admin */}
       <motion.div variants={item}>
         <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-3">Actions rapides</h3>
-        <div className="flex flex-wrap gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Link
             to="/dashboard/inventory"
-            className="flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-sm"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors shadow-sm"
           >
             <Laptop size={15} /> Gérer l&apos;inventaire
           </Link>
           <Link
             to="/dashboard/reservations"
-            className="flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 border border-gray-200 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-gray-700 border border-gray-200 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
           >
             <ClipboardList size={15} /> Traiter les réservations
           </Link>
           <Link
             to="/dashboard/loans"
-            className="flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 border border-gray-200 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-gray-700 border border-gray-200 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
           >
             <Archive size={15} /> Suivre les emprunts
           </Link>
