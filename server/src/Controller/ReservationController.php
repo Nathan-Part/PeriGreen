@@ -317,6 +317,12 @@ class ReservationController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
+        // Supprimer d'abord le prêt associé si existant (contrainte FK Loan → Reservation)
+        $loan = $this->loanRepo->findOneBy(['reservation' => $reservation]);
+        if ($loan) {
+            $em->remove($loan);
+        }
+
         $em->remove($reservation);
         $em->flush();
         return $this->json(['message' => 'Réservation supprimée'], 200);

@@ -4,6 +4,7 @@ import {
   createReservation as apiCreate,
   updateReservation,
   cancelReservation as apiCancel,
+  deleteReservation as apiDelete,
   type Reservation,
 } from '../services/api';
 
@@ -16,6 +17,8 @@ interface ReservationsState {
   create: (data: { quantity: number; equipmentId: number }) => Promise<void>;
   updateStatus: (id: number, status: string, decisionNote?: string, dueDate?: string) => Promise<void>;
   cancel: (id: number) => Promise<void>;
+  deleteOne: (id: number) => Promise<void>;
+  deleteAll: (ids: number[]) => Promise<void>;
 }
 
 export const useReservations = create<ReservationsState>((set) => ({
@@ -76,6 +79,26 @@ export const useReservations = create<ReservationsState>((set) => ({
       set((s) => ({
         reservations: s.reservations.map((r) => (r.id === id ? updated : r)),
       }));
+    } catch (e) {
+      set({ error: (e as Error).message });
+      throw e;
+    }
+  },
+
+  deleteOne: async (id) => {
+    try {
+      await apiDelete(id);
+      set((s) => ({ reservations: s.reservations.filter((r) => r.id !== id) }));
+    } catch (e) {
+      set({ error: (e as Error).message });
+      throw e;
+    }
+  },
+
+  deleteAll: async (ids) => {
+    try {
+      await Promise.all(ids.map((id) => apiDelete(id)));
+      set((s) => ({ reservations: s.reservations.filter((r) => !ids.includes(r.id)) }));
     } catch (e) {
       set({ error: (e as Error).message });
       throw e;
