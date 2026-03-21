@@ -28,7 +28,7 @@ export interface Equipment {
   imageUrl?: string;
 }
 
-export type LoanStatus = 'PENDING' | 'ACTIVE' | 'COMPLETED' | 'OVERDUE' | 'CANCELLED';
+export type LoanStatus = 'EN_COURS' | 'TERMINE' | 'EN_RETARD' | 'ANNULEE';
 
 export interface Loan {
   id: string;

@@ -20,7 +20,7 @@ class LoanFixtures extends Fixture implements DependentFixtureInterface
             $reservation = $this->getReference("reservation-$i", Reservation::class);
 
             // Only create loans for validated reservations
-            if ($reservation->getStatus() === 'VALIDATED') {
+            if ($reservation->getStatus() === 'VALIDEE') {
                 $loan = new Loan();
                 $loan->setReservation($reservation);
                 $loan->setEquipment($reservation->getEquipment());
