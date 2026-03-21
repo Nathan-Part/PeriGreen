@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { CheckCircle2, XCircle, ClipboardList, MessageSquare, AlertCircle } from 'lucide-react';
 import { useReservations } from '../../hooks/useReservations';
 
@@ -79,8 +80,103 @@ export default function GestionReservations() {
         </div>
       )}
 
-      {/* Table */}
-      <div className="pg-card">
+      {/* Mobile Card View */}
+      <div className="grid grid-cols-1 md:hidden gap-4">
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm animate-pulse space-y-4">
+              <div className="h-4 bg-gray-100 rounded w-3/4" />
+              <div className="h-3 bg-gray-100 rounded w-1/2" />
+              <div className="h-8 bg-gray-100 rounded w-full" />
+            </div>
+          ))
+        ) : filtered.length === 0 ? (
+          <div className="bg-white p-8 rounded-2xl border border-gray-100 text-center">
+            <ClipboardList size={40} className="text-gray-200 mx-auto mb-3" />
+            <p className="text-gray-400 text-sm">Aucune réservation trouvée.</p>
+          </div>
+        ) : (
+          filtered.map((r) => (
+            <motion.div
+              key={r.id}
+              layout
+              className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-4"
+            >
+              {/* Header: Equipment + Status */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-900 truncate">{r.equipment?.name ?? '—'}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {r.requester?.email ?? '—'}
+                  </p>
+                </div>
+                <StatutBadge status={r.status} />
+              </div>
+
+              {/* Info Grid */}
+              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-50">
+                <div>
+                  <span className="text-[10px] text-gray-400 uppercase font-bold">Quantité</span>
+                  <p className="text-sm font-medium text-gray-700">{r.quantity}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-gray-400 uppercase font-bold">Date</span>
+                  <p className="text-sm font-medium text-gray-700">
+                    {r.createdAt ? new Date(r.createdAt).toLocaleDateString('fr-FR') : '—'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Note input / display */}
+              <div className="pt-3 border-t border-gray-50">
+                {r.status === 'EN_ATTENTE' ? (
+                  <div className="flex items-center gap-2">
+                    <MessageSquare size={14} className="text-gray-300 shrink-0" />
+                    <input
+                      type="text"
+                      placeholder="Note optionnelle…"
+                      value={activeNote[r.id] ?? ''}
+                      onChange={(e) => setActiveNote((n) => ({ ...n, [r.id]: e.target.value }))}
+                      className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-green-300"
+                    />
+                  </div>
+                ) : (
+                  <span className="text-xs text-gray-400 italic">{r.decisionNote ?? '—'}</span>
+                )}
+              </div>
+
+              {/* Actions */}
+              {r.status === 'EN_ATTENTE' ? (
+                <div className="flex items-center gap-2 pt-3 border-t border-gray-50">
+                  <button
+                    onClick={() => handleAction(r.id, 'VALIDEE')}
+                    disabled={actionLoading === r.id}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg transition-colors disabled:opacity-50 text-sm font-medium"
+                  >
+                    {actionLoading === r.id ? (
+                      <span className="h-4 w-4 border-2 border-green-300 border-t-green-600 rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <CheckCircle2 size={16} /> Valider
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleAction(r.id, 'REFUSEE')}
+                    disabled={actionLoading === r.id}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-red-50 text-red-500 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50 text-sm font-medium"
+                  >
+                    <XCircle size={16} /> Refuser
+                  </button>
+                </div>
+              ) : null}
+            </motion.div>
+          ))
+        )}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block pg-card">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>

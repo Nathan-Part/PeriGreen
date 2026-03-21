@@ -1,6 +1,11 @@
 // client/src/styles/_mixins.scss
 @use 'variables' as var;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// NOTE: Ces mixins sont pour rétrocompatibilité (classes .btn-primary, .pg-card)
+// Pour les nouveaux composants, utilisez Tailwind directement
+// ─────────────────────────────────────────────────────────────────────────────
+
 // Bouton générique
 @mixin btn-base {
   display: inline-flex;
@@ -21,14 +26,14 @@
   }
 }
 
-// Bouton Primaire (Vert)
+// Bouton Primaire (Vert) - Utilise Tailwind green-600
 @mixin btn-primary {
   @include btn-base;
-  background-color: var.$color-primary;
+  background-color: #16a34a;  // green-600
   color: white;
 
   &:hover:not(:disabled) {
-    background-color: var.$color-primary-dark;
+    background-color: #15803d;  // green-700
   }
 }
 
@@ -71,4 +76,45 @@
   background-color: $bg-color;
   color: $text-color;
   border: 1px solid $border-color;
+}
+
+// ─── Mixins Responsive (Mobile-first) ─────────────────────────────────────
+
+// Usage : @include bp(md) { ... }
+// Génère : @media (min-width: 768px) { ... }
+
+// Breakpoints Tailwind v4
+$bp-sm: 640px;
+$bp-md: 768px;
+$bp-lg: 1024px;
+$bp-xl: 1280px;
+$bp-2xl: 1536px;
+
+@mixin bp($breakpoint) {
+  @if $breakpoint == sm {
+    @media (min-width: $bp-sm) { @content; }
+  } @else if $breakpoint == md {
+    @media (min-width: $bp-md) { @content; }
+  } @else if $breakpoint == lg {
+    @media (min-width: $bp-lg) { @content; }
+  } @else if $breakpoint == xl {
+    @media (min-width: $bp-xl) { @content; }
+  } @else if $breakpoint == 2xl {
+    @media (min-width: $bp-2xl) { @content; }
+  }
+}
+
+// Mixin utilitaire pour cacher/afficher selon breakpoint
+@mixin hide-on-mobile {
+  display: none;
+  @include bp(md) {
+    display: block;
+  }
+}
+
+@mixin hide-on-desktop {
+  display: block;
+  @include bp(md) {
+    display: none;
+  }
 }
