@@ -155,6 +155,38 @@ class LoanController extends AbstractController
         return $this->json($this->format($loan));
     }
 
+    #[Route('/{id}/retourner', name: 'return', methods: ['PATCH'])]
+    public function retourner(Loan $loan, EntityManagerInterface $em): JsonResponse
+    {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+
+        if (!$user) {
+            return $this->json(['error' => 'Non authentifié'], 401);
+        }
+
+        // Seul l'emprunteur ou un admin peut rendre l'objet
+        if (!$this->isGranted('ROLE_ADMIN') && $loan->getBorrower() !== $user) {
+            return $this->json(['error' => 'Accès refusé'], 403);
+        }
+
+        // Vérifier que le prêt n'est pas déjà terminé
+        if ($loan->getStatus() === LoanStatus::TERMINE) {
+            return $this->json(['error' => 'Ce prêt est déjà terminé'], 400);
+        }
+
+        // Marquer comme terminé et incrémenter le stock
+        $loan->setStatus(LoanStatus::TERMINE);
+        $loan->setReturnDate(new \DateTimeImmutable());
+        $loan->getEquipment()->setTotalQuantity(
+            $loan->getEquipment()->getTotalQuantity() + $loan->getQuantity()
+        );
+
+        $em->flush();
+
+        return $this->json($this->format($loan));
+    }
+
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete(Loan $loan, EntityManagerInterface $em): JsonResponse
     {

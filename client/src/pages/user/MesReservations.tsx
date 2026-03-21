@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { CalendarCheck, PlusCircle, Hourglass, CheckCircle2, XCircle, Clock, Ban } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useReservations } from '../../hooks/useReservations';
@@ -27,6 +27,7 @@ export default function MesReservations() {
   const [cancelingId, setCancelingId] = useState<number | null>(null);
   const [confirmId, setConfirmId] = useState<number | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user?.id) fetchMine(user.id);
@@ -107,7 +108,11 @@ export default function MesReservations() {
                   const isCanceling = cancelingId === r.id;
 
                   return (
-                    <tr key={r.id} className="hover:bg-gray-50/60 transition-colors">
+                    <tr
+                      key={r.id}
+                      className="hover:bg-gray-50/60 transition-colors cursor-pointer"
+                      onClick={() => navigate(`/espace/reservations/${r.id}`)}
+                    >
                       <td className="px-6 py-4">
                         <p className="font-medium text-gray-900 text-sm">{r.equipment?.name ?? '—'}</p>
                       </td>
@@ -123,14 +128,14 @@ export default function MesReservations() {
                           isConfirming ? (
                             <div className="flex items-center gap-2">
                               <button
-                                onClick={() => handleCancel(r.id)}
+                                onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleCancel(r.id); }}
                                 disabled={isCanceling}
                                 className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-60"
                               >
                                 {isCanceling ? 'Annulation…' : 'Confirmer'}
                               </button>
                               <button
-                                onClick={() => setConfirmId(null)}
+                                onClick={(e: React.MouseEvent) => { e.stopPropagation(); setConfirmId(null); }}
                                 disabled={isCanceling}
                                 className="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
                               >
@@ -139,7 +144,7 @@ export default function MesReservations() {
                             </div>
                           ) : (
                             <button
-                              onClick={() => setConfirmId(r.id)}
+                              onClick={(e: React.MouseEvent) => { e.stopPropagation(); setConfirmId(r.id); }}
                               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
                             >
                               <Ban size={13} />
