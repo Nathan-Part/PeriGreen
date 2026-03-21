@@ -69,9 +69,9 @@ export default function Inventory() {
                     {isAdmin && (
                         <button
                             onClick={() => navigate('/dashboard/inventory/new')}
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 w-fit self-end bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 transition-colors shadow-sm"
                         >
-                            <PlusCircle size={15} /> Ajouter matériel
+                            <PlusCircle size={16} /> Ajouter matériel
                         </button>
                     )}
                     <div className="flex flex-col sm:flex-row gap-3">
@@ -170,13 +170,23 @@ export default function Inventory() {
                                                         </Button>
                                                     </Link>
                                                 </div>
-                                            ) : (
-                                                <Link to={`/espace/reservations/nouvelle`} className="w-full">
-                                                    <Button variant="secondary" className="w-full font-bold group-hover:bg-green-50 group-hover:text-green-700 border-none">
-                                                        Réserver
-                                                    </Button>
-                                                </Link>
-                                            )}
+                                             ) : (
+                                                 (equipment.totalQuantity ?? 0) === 0 ? (
+                                                     <Button 
+                                                         variant="danger" 
+                                                         disabled 
+                                                         className="w-full font-bold cursor-not-allowed opacity-70 pointer-events-auto shadow-none"
+                                                     >
+                                                         Rupture de stock
+                                                     </Button>
+                                                 ) : (
+                                                     <Link to={`/espace/reservations/nouvelle?equipmentId=${equipment.id}`} className="w-full">
+                                                         <Button variant="secondary" className="w-full font-bold group-hover:bg-green-50 group-hover:text-green-700 border-none">
+                                                             Réserver
+                                                         </Button>
+                                                     </Link>
+                                                 )
+                                             )}
                                         </CardFooter>
                                     </Card>
                                 </motion.div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Send, Package } from 'lucide-react';
 import { getEquipments, type Equipment } from '../../services/api';
 import { useReservations } from '../../hooks/useReservations';
@@ -12,8 +12,11 @@ export default function NouvelleReservation() {
   const [loadingEq, setLoadingEq] = useState(true);
   const [success, setSuccess] = useState(false);
 
+  const [searchParams] = useSearchParams();
+  const preSelectedId = searchParams.get('equipmentId');
+
   const [form, setForm] = useState({
-    equipmentId: '',
+    equipmentId: preSelectedId || '',
     quantity: 1,
   });
 
