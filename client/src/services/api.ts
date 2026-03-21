@@ -112,7 +112,7 @@ export interface Equipment {
   serialNumber: string;
   etat: string;
   status?: string;
-  condition?: string;
+  localisation?: string;
   totalQuantity: number;
   imageUrl: string;
   category: {

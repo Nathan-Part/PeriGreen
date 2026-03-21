@@ -5,23 +5,37 @@ import { useAuth } from '../hooks/useAuth';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-import { Search, Filter, Laptop, Smartphone, Monitor, HardDrive, Package, PlusCircle, type LucideIcon } from 'lucide-react';
+import { Search, Filter, Laptop, Smartphone, Monitor, Package, PlusCircle, type LucideIcon, MousePointer2 as Mouse, Keyboard, Cable, Cpu, Headphones, Webcam, Usb, Zap } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
+    'Souris': Mouse,
+    'Clavier': Keyboard,
+    'Câble HDMI': Cable,
+    'Câble Ethernet': Cable,
+    'Adaptateur USB': Usb,
+    'Adaptateur HDMI': Cpu,
+    'Hub USB': Cpu,
+    'Écran': Monitor,
+    'Chargeur PC': Zap,
+    'Casque audio': Headphones,
+    'Webcam': Webcam,
+    'Clé USB': Usb,
+    'Multiprise': Zap,
+    // Fallbacks
     'Portable': Laptop,
     'Mobile': Smartphone,
     'Ecran': Monitor,
-    'Stockage': HardDrive,
-    'Périphérique': Package,
+    'Matériel': Package,
 };
 
 const ETAT_BADGE: Record<string, React.ReactElement> = {
-    'bon': <Badge variant="success">Bon état</Badge>,
-    'bon état': <Badge variant="success">Bon état</Badge>,
-    'moyen': <Badge variant="warning">État moyen</Badge>,
-    'mauvais': <Badge variant="danger">Mauvais état</Badge>,
-    'neuf': <Badge variant="info">Neuf</Badge>,
+    'BON':           <Badge variant="success">Bon état</Badge>,
+    'USÉ':           <Badge variant="warning">Usé</Badge>,
+    'RECONDITIONNÉ': <Badge variant="info">Reconditionné</Badge>,
+    // Rétrocompatibilité
+    'bon':       <Badge variant="success">Bon état</Badge>,
+    'neuf':      <Badge variant="info">Neuf</Badge>,
 };
 
 export default function Inventory() {
@@ -49,8 +63,23 @@ export default function Inventory() {
     const isLoading = isEquipLoading || isCatsLoading;
 
     const getEtatBadge = (etat: string) => {
-        const lower = (etat ?? '').toLowerCase();
-        return ETAT_BADGE[lower] ?? <Badge variant="default">{etat}</Badge>;
+        if (!etat) return null;
+        const key = etat.toUpperCase();
+        return ETAT_BADGE[key] ?? <Badge variant="default">{etat}</Badge>;
+    };
+
+    const getStatusBadge = (status?: string) => {
+        if (!status) return null;
+        const normalized = status.toUpperCase();
+        switch (normalized) {
+            case 'AVAILABLE':
+            case 'DISPONIBLE': return null; // On masque pour ne pas encombrer l'interface si dispo
+            case 'EMPRUNTÉ':
+            case 'IN_USE':     return <Badge variant="warning" className="bg-orange-100 text-orange-700">Emprunté</Badge>;
+            case 'EN RÉPARATION': 
+            case 'MAINTENANCE': return <Badge variant="danger">En réparation</Badge>;
+            default: return <Badge variant="default">{status}</Badge>;
+        }
     };
 
     return (
@@ -136,7 +165,10 @@ export default function Inventory() {
                                                 <div className="p-2.5 bg-white border border-gray-100 rounded-xl text-primary-600 group-hover:bg-primary-500 group-hover:text-white transition-colors">
                                                     <Icon size={20} />
                                                 </div>
-                                                {equipment.etat ? getEtatBadge(equipment.etat) : <Badge variant="default">—</Badge>}
+                                                <div className="flex flex-col gap-2 items-end">
+                                                    {equipment.etat ? getEtatBadge(equipment.etat) : null}
+                                                    {getStatusBadge(equipment.status)}
+                                                </div>
                                             </div>
                                             <div className="mt-4">
                                                 <CardTitle className="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors line-clamp-1">{equipment.name}</CardTitle>

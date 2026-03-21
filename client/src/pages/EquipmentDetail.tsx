@@ -23,11 +23,25 @@ const reservationFormSchema = z.object({
 type ReservationFormData = z.infer<typeof reservationFormSchema>;
 
 const ETAT_BADGE: Record<string, React.ReactNode> = {
-    'bon': <Badge variant="success">Bon état</Badge>,
-    'bon état': <Badge variant="success">Bon état</Badge>,
-    'moyen': <Badge variant="warning">État moyen</Badge>,
-    'mauvais': <Badge variant="danger">Mauvais état</Badge>,
-    'neuf': <Badge variant="info">Neuf</Badge>,
+    'BON':           <Badge variant="success">Bon état</Badge>,
+    'USÉ':           <Badge variant="warning">Usé</Badge>,
+    'RECONDITIONNÉ': <Badge variant="info">Reconditionné</Badge>,
+    'bon':           <Badge variant="success">Bon état</Badge>,
+    'neuf':          <Badge variant="info">Neuf</Badge>,
+};
+
+const getStatusBadge = (status?: string) => {
+    if (!status) return null;
+    const normalized = status.toUpperCase();
+    switch (normalized) {
+        case 'AVAILABLE':
+        case 'DISPONIBLE': return null;
+        case 'EMPRUNTÉ':
+        case 'IN_USE':     return <Badge variant="warning" className="bg-orange-100 text-orange-700">Emprunté</Badge>;
+        case 'EN RÉPARATION':
+        case 'MAINTENANCE': return <Badge variant="danger">En réparation</Badge>;
+        default: return <Badge variant="default">{status}</Badge>;
+    }
 };
 
 export default function EquipmentDetail() {
@@ -100,12 +114,11 @@ export default function EquipmentDetail() {
                                 ) : (
                                     <Laptop size={80} className="text-gray-200" />
                                 )}
-                                <div className="absolute top-4 right-4">
+                                <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
                                     {equipment.etat ? (
-                                        ETAT_BADGE[equipment.etat.toLowerCase()] ?? <Badge variant="default">{equipment.etat}</Badge>
-                                    ) : (
-                                        <Badge variant="success" className="text-lg py-1 px-4">Disponible</Badge>
-                                    )}
+                                        ETAT_BADGE[equipment.etat.toUpperCase()] ?? <Badge variant="default">{equipment.etat}</Badge>
+                                    ) : null}
+                                    {getStatusBadge(equipment.status)}
                                 </div>
                             </div>
                             <CardContent className="pt-6 sm:pt-8">
@@ -125,7 +138,7 @@ export default function EquipmentDetail() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 py-4 sm:py-6 border-y border-gray-100">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 py-4 sm:py-6 border-y border-gray-100">
                                     <div>
                                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Catégorie</span>
                                         <span className="font-medium text-gray-900">{categoryName}</span>
@@ -134,7 +147,11 @@ export default function EquipmentDetail() {
                                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Quantité</span>
                                         <span className="font-medium text-gray-900">{equipment.totalQuantity} unités</span>
                                     </div>
-                                    <div className="col-span-2 sm:col-span-1">
+                                    <div>
+                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Localisation</span>
+                                        <span className="font-medium text-gray-900">{equipment.localisation || '—'}</span>
+                                    </div>
+                                    <div>
                                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">ID Matériel</span>
                                         <span className="font-medium text-gray-900 font-mono text-sm">#{equipment.id}</span>
                                     </div>

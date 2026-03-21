@@ -10,9 +10,9 @@ export interface User {
   avatarUrl?: string;
 }
 
-export type EquipmentStatus = 'AVAILABLE' | 'IN_USE' | 'MAINTENANCE' | 'RETIRED' | 'LOST';
+export type EquipmentStatus = 'DISPONIBLE' | 'EN_COURS' | 'EN_REPARATION' | 'REFORME' | 'PERDU';
 
-export type EquipmentCondition = 'NEW' | 'GOOD' | 'FAIR' | 'POOR';
+export type EquipmentCondition = 'NEUF' | 'BON' | 'MOYEN' | 'MAUVAIS';
 
 export interface Equipment {
   id: string;
