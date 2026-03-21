@@ -339,6 +339,13 @@ export const getUsers = async (): Promise<User[]> => {
   return fetchApi<User[]>('/api/users');
 };
 
+export const createUser = async (data: Omit<User, 'id'> & { password?: string }) => {
+  return fetchApi<User>('/api/users', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
 export const updateUser = async (id: number, data: Partial<User>) => {
   return fetchApi<User>(`/api/users/${id}`, {
     method: 'PUT',
