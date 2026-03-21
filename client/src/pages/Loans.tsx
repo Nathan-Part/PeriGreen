@@ -1,7 +1,7 @@
-import { useLoans, useUpdateLoan } from '../hooks/useLoans';
+import { useLoans, useUpdateLoan, useDeleteLoan } from '../hooks/useLoans';
 import { Card, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { Laptop, Calendar, Clock, AlertCircle, CheckCircle2, AlertTriangle, RotateCcw } from 'lucide-react';
+import { Laptop, Calendar, Clock, AlertCircle, CheckCircle2, AlertTriangle, RotateCcw, Trash2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 const getStatusBadge = (status: string) => {
@@ -22,11 +22,18 @@ export default function Loans() {
     const { data: loans, isLoading } = useLoans();
     const { user } = useAuth();
     const { mutate: updateLoan } = useUpdateLoan();
+    const { mutate: deleteLoan } = useDeleteLoan();
     const isAdmin = user?.roles.includes('ROLE_ADMIN');
 
     const handleReturn = (id: number) => {
         if (window.confirm('Confirmer le retour de ce matériel ?')) {
             updateLoan({ id, data: { status: 'TERMINE' } });
+        }
+    };
+
+    const handleDelete = (id: number) => {
+        if (window.confirm('Êtes-vous sûr de vouloir supprimer cet emprunt ? Cette action est irréversible.')) {
+            deleteLoan(id);
         }
     };
 
@@ -142,16 +149,26 @@ export default function Loans() {
                                                     </td>
                                                     {isAdmin && (
                                                         <td className="px-6 py-4 text-right">
-                                                            {loan.status !== 'TERMINE' && (
+                                                            <div className="flex justify-end items-center gap-2">
+                                                                {loan.status !== 'TERMINE' && (
+                                                                    <button
+                                                                        onClick={() => handleReturn(loan.id)}
+                                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg text-xs font-bold transition-colors"
+                                                                        title="Marquer comme rendu"
+                                                                    >
+                                                                        <RotateCcw size={14} />
+                                                                        Retour
+                                                                    </button>
+                                                                )}
                                                                 <button
-                                                                    onClick={() => handleReturn(loan.id)}
-                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg text-xs font-bold transition-colors"
-                                                                    title="Marquer comme rendu"
+                                                                    onClick={() => handleDelete(loan.id)}
+                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-bold transition-colors"
+                                                                    title="Supprimer l'emprunt"
                                                                 >
-                                                                    <RotateCcw size={14} />
-                                                                    Retour
+                                                                    <Trash2 size={14} />
+                                                                    Supprimer
                                                                 </button>
-                                                            )}
+                                                            </div>
                                                         </td>
                                                     )}
                                                 </tr>
