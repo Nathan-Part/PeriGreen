@@ -5,7 +5,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { 
-  getUsers, updateUser, deleteUser, User 
+  getUsers, updateUser, deleteUser, type User 
 } from '../../services/api';
 import { cn } from '../../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
