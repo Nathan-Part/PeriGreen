@@ -16,15 +16,29 @@ use Symfony\Component\Routing\Attribute\Route;
 class UserController extends AbstractController
 {
     #[Route('', name: 'list', methods: ['GET'])]
-    public function list(UserRepository $repo): JsonResponse
+    public function list(Request $request, UserRepository $repo): JsonResponse
     {
-        return $this->json(array_map(fn($u) => $this->format($u), $repo->findAll()));
+        $data = array_map(fn($u) => $this->format($u), $repo->findAll());
+
+        $response = new JsonResponse($data);
+        $response->setEtag(md5(serialize($data)));
+        $response->setPrivate(); // Contient des emails et données personnelles
+        $response->isNotModified($request);
+
+        return $response;
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(User $user): JsonResponse
+    public function show(Request $request, User $user): JsonResponse
     {
-        return $this->json($this->format($user));
+        $data = $this->format($user);
+
+        $response = new JsonResponse($data);
+        $response->setEtag(md5(serialize($data)));
+        $response->setPrivate();
+        $response->isNotModified($request);
+
+        return $response;
     }
 
     #[Route('', name: 'create', methods: ['POST'])]
