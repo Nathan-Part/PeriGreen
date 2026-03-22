@@ -196,9 +196,9 @@ export default function Inventory() {
                                         <CardFooter className="pt-0 border-none">
                                             {isAdmin ? (
                                                 <div className="flex gap-2 w-full">
-                                                    <Link to={`/dashboard/inventory/${equipment.id}`} className="flex-1">
+                                                    <Link to={`/dashboard/inventory/${equipment.id}/edit`} className="flex-1">
                                                         <Button variant="secondary" className="w-full font-bold text-xs border-none">
-                                                            Détails / Modifier
+                                                            Modifier
                                                         </Button>
                                                     </Link>
                                                 </div>

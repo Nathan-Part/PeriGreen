@@ -16,6 +16,7 @@ const Stats               = lazy(() => import("./pages/Stats"));
 const GestionReservations = lazy(() => import("./pages/admin/GestionReservations"));
 const ManageUsers         = lazy(() => import("./pages/admin/ManageUsers"));
 const NewEquipment        = lazy(() => import("./pages/admin/NewEquipment"));
+const EditEquipment       = lazy(() => import("./pages/admin/EditEquipment"));
 const MyProfile           = lazy(() => import("./pages/MyProfile"));
 
 // ─── Pages User ─────────────────────────────────────────────────────────────
@@ -61,6 +62,7 @@ function App() {
             <Route index                   element={<Dashboard />} />
             <Route path="inventory"        element={<Inventory />} />
             <Route path="inventory/new"    element={<NewEquipment />} />
+            <Route path="inventory/:id/edit" element={<EditEquipment />} />
             <Route path="inventory/:id"    element={<EquipmentDetail />} />
             <Route path="loans"            element={<Loans />} />
             <Route path="stats"            element={<Stats />} />
