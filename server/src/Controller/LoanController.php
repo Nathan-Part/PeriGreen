@@ -20,7 +20,7 @@ class LoanController extends AbstractController
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(LoanRepository $repo): JsonResponse
     {
-        $loans = $repo->findAll();
+        $loans = $repo->findAllWithJoins();
         return $this->json(array_map(fn($l) => $this->format($l), $loans));
     }
 
@@ -63,6 +63,18 @@ class LoanController extends AbstractController
         $reservation = $reservationRepo->find($data['reservationId']);
         if (!$reservation) return $this->json(['error' => 'Réservation introuvable'], 404);
 
+        // Vérification du stock si le statut n'est pas déjà TERMINÉ
+        if ($status !== LoanStatus::TERMINE) {
+            if ($equipment->getTotalQuantity() < (int)$data['quantity']) {
+                return $this->json(['error' => 'Stock insuffisant pour créer ce prêt'], 400);
+            }
+            $equipment->setTotalQuantity($equipment->getTotalQuantity() - (int)$data['quantity']);
+        }
+
+        if ($status !== LoanStatus::TERMINE) {
+            $equipment->setStatus('IN_USE');
+        }
+
         $loan = new Loan();
         $loan->setPickupDate(new \DateTimeImmutable($data['pickupDate']));
         $loan->setDueDate(new \DateTimeImmutable($data['dueDate']));
@@ -104,6 +116,25 @@ class LoanController extends AbstractController
         if (isset($data['status'])) {
             $status = LoanStatus::tryFrom($data['status']);
             if (!$status) return $this->json(['error' => 'Statut invalide'], 400);
+            
+            $previousStatus = $loan->getStatus();
+            // Si on passe à TERMINE, on rend les objets au stock et repasse l'équipement AVAILABLE
+            if ($status === LoanStatus::TERMINE && $previousStatus !== LoanStatus::TERMINE) {
+                $equipment = $loan->getEquipment();
+                $equipment->setTotalQuantity($equipment->getTotalQuantity() + $loan->getQuantity());
+                // Vérifier si d'autres emprunts actifs existent sur le même équipement
+                $equipment->setStatus('AVAILABLE');
+                
+                if (!$loan->getReturnDate() && !isset($data['returnDate'])) {
+                    $loan->setReturnDate(new \DateTimeImmutable());
+                }
+            }
+            if ($previousStatus === LoanStatus::TERMINE && $status !== LoanStatus::TERMINE) {
+                $equipment = $loan->getEquipment();
+                $equipment->setTotalQuantity($equipment->getTotalQuantity() - $loan->getQuantity());
+                $equipment->setStatus('IN_USE');
+            }
+
             $loan->setStatus($status);
         }
 
@@ -129,10 +160,47 @@ class LoanController extends AbstractController
         return $this->json($this->format($loan));
     }
 
+    #[Route('/{id}/retourner', name: 'return', methods: ['PATCH'])]
+    public function retourner(Loan $loan, EntityManagerInterface $em): JsonResponse
+    {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+
+        if (!$user) {
+            return $this->json(['error' => 'Non authentifié'], 401);
+        }
+
+        // Seul l'emprunteur ou un admin peut rendre l'objet
+        if (!$this->isGranted('ROLE_ADMIN') && $loan->getBorrower() !== $user) {
+            return $this->json(['error' => 'Accès refusé'], 403);
+        }
+
+        if ($loan->getStatus() === LoanStatus::TERMINE) {
+            return $this->json(['error' => 'Ce prêt est déjà terminé'], 400);
+        }
+
+        $loan->setStatus(LoanStatus::TERMINE);
+        $loan->setReturnDate(new \DateTimeImmutable());
+        $loan->getEquipment()->setTotalQuantity(
+            $loan->getEquipment()->getTotalQuantity() + $loan->getQuantity()
+        );
+        $loan->getEquipment()->setStatus('AVAILABLE');
+
+        $em->flush();
+
+        return $this->json($this->format($loan));
+    }
+
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete(Loan $loan, EntityManagerInterface $em): JsonResponse
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        // Si le prêt n'était pas encore terminé, on rend les objets au stock (car ils étaient "sortis")
+        if ($loan->getStatus() !== LoanStatus::TERMINE) {
+            $equipment = $loan->getEquipment();
+            $equipment->setTotalQuantity($equipment->getTotalQuantity() + $loan->getQuantity());
+        }
 
         $em->remove($loan);
         $em->flush();

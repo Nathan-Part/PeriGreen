@@ -40,6 +40,12 @@ class Equipment
     #[ORM\Column(length: 255)]
     private ?string $imageUrl = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $status = 'DISPONIBLE';
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $localisation = null;
+
     #[ORM\ManyToOne(inversedBy: 'equipment')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Category $category = null;
@@ -231,6 +237,29 @@ class Equipment
                 $loan->setEquipment(null);
             }
         }
+
+        return $this;
+    }
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getLocalisation(): ?string
+    {
+        return $this->localisation;
+    }
+
+    public function setLocalisation(?string $localisation): static
+    {
+        $this->localisation = $localisation;
 
         return $this;
     }

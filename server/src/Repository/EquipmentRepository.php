@@ -16,28 +16,37 @@ class EquipmentRepository extends ServiceEntityRepository
         parent::__construct($registry, Equipment::class);
     }
 
-    //    /**
-    //     * @return Equipment[] Returns an array of Equipment objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('e')
-    //            ->andWhere('e.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('e.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * Récupère tous les équipements avec leur catégorie et leurs emprunts
+     * pré-chargés en UNE SEULE requête SQL (évite le problème N+1).
+     *
+     * @return Equipment[]
+     */
+    public function findAllWithJoins(): array
+    {
+        return $this->createQueryBuilder('e')
+            ->addSelect('c', 'l')
+            ->leftJoin('e.category', 'c')
+            ->leftJoin('e.loans', 'l')
+            ->orderBy('e.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?Equipment
-    //    {
-    //        return $this->createQueryBuilder('e')
-    //            ->andWhere('e.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * Récupère un équipement par son ID avec sa catégorie et ses emprunts
+     * pré-chargés en UNE SEULE requête SQL.
+     */
+    public function findOneWithJoins(int $id): ?Equipment
+    {
+        return $this->createQueryBuilder('e')
+            ->addSelect('c', 'l')
+            ->leftJoin('e.category', 'c')
+            ->leftJoin('e.loans', 'l')
+            ->where('e.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }
+

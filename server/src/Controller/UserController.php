@@ -15,16 +15,101 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/users', name: 'api_users_')]
 class UserController extends AbstractController
 {
-    #[Route('', name: 'list', methods: ['GET'])]
-    public function list(UserRepository $repo): JsonResponse
+    #[Route('/me', name: 'me', methods: ['GET'])]
+    public function me(Request $request): JsonResponse
     {
-        return $this->json(array_map(fn($u) => $this->format($u), $repo->findAll()));
+        /** @var User|null $user */
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json(['error' => 'Non authentifie'], 401);
+        }
+
+        $data = $this->format($user);
+
+        $response = new JsonResponse($data);
+        $response->setEtag(md5(serialize($data)));
+        $response->setPrivate();
+        $response->isNotModified($request);
+
+        return $response;
+    }
+
+    #[Route('/me', name: 'me_update', methods: ['PUT'])]
+    public function updateMe(
+        Request $request,
+        EntityManagerInterface $em,
+        UserRepository $userRepo,
+        UserPasswordHasherInterface $passwordHasher
+    ): JsonResponse {
+        /** @var User|null $user */
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json(['error' => 'Non authentifie'], 401);
+        }
+
+        $data = json_decode($request->getContent(), true) ?? [];
+
+        if (isset($data['email'])) {
+            $existing = $userRepo->findOneBy(['email' => $data['email']]);
+            if ($existing && $existing->getId() !== $user->getId()) {
+                return $this->json(['error' => 'Email deja utilise'], 409);
+            }
+            $user->setEmail($data['email']);
+        }
+
+        if (isset($data['fullName'])) {
+            $user->setFullName($data['fullName']);
+        }
+
+        if (isset($data['universityId'])) {
+            $user->setUniversityId($data['universityId']);
+        }
+
+        if (!empty($data['password'])) {
+            if (empty($data['currentPassword'])) {
+                return $this->json(['error' => 'Le mot de passe actuel est requis'], 400);
+            }
+
+            if (!$passwordHasher->isPasswordValid($user, $data['currentPassword'])) {
+                return $this->json(['error' => 'Mot de passe actuel invalide'], 400);
+            }
+
+            $user->setPassword($passwordHasher->hashPassword($user, $data['password']));
+        }
+
+        $em->flush();
+
+        return $this->json($this->format($user));
+    }
+
+    #[Route('', name: 'list', methods: ['GET'])]
+    public function list(Request $request, UserRepository $repo): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $data = array_map(fn($u) => $this->format($u), $repo->findAll());
+
+        $response = new JsonResponse($data);
+        $response->setEtag(md5(serialize($data)));
+        $response->setPrivate(); // Contient des emails et données personnelles
+        $response->isNotModified($request);
+
+        return $response;
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(User $user): JsonResponse
+    public function show(Request $request, User $user): JsonResponse
     {
-        return $this->json($this->format($user));
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $data = $this->format($user);
+
+        $response = new JsonResponse($data);
+        $response->setEtag(md5(serialize($data)));
+        $response->setPrivate();
+        $response->isNotModified($request);
+
+        return $response;
     }
 
     #[Route('', name: 'create', methods: ['POST'])]
@@ -34,6 +119,8 @@ class UserController extends AbstractController
         UserRepository $userRepo,
         UserPasswordHasherInterface $passwordHasher
     ): JsonResponse {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $data = json_decode($request->getContent(), true);
 
         $required = ['email', 'password', 'fullName', 'universityId', 'role'];
@@ -75,6 +162,8 @@ class UserController extends AbstractController
         UserRepository $userRepo,
         UserPasswordHasherInterface $passwordHasher
     ): JsonResponse {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $data = json_decode($request->getContent(), true);
 
         if (isset($data['email'])) {
@@ -106,6 +195,8 @@ class UserController extends AbstractController
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete(User $user, EntityManagerInterface $em): JsonResponse
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $em->remove($user);
         $em->flush();
         return $this->json(['message' => 'Utilisateur supprimé'], 200);

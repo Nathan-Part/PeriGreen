@@ -5,23 +5,37 @@ import { useAuth } from '../hooks/useAuth';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-import { Search, Filter, Laptop, Smartphone, Monitor, HardDrive, Package, PlusCircle, type LucideIcon } from 'lucide-react';
+import { Search, Filter, Laptop, Smartphone, Monitor, Package, PlusCircle, type LucideIcon, MousePointer2 as Mouse, Keyboard, Cable, Cpu, Headphones, Webcam, Usb, Zap } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
+    'Souris': Mouse,
+    'Clavier': Keyboard,
+    'Câble HDMI': Cable,
+    'Câble Ethernet': Cable,
+    'Adaptateur USB': Usb,
+    'Adaptateur HDMI': Cpu,
+    'Hub USB': Cpu,
+    'Écran': Monitor,
+    'Chargeur PC': Zap,
+    'Casque audio': Headphones,
+    'Webcam': Webcam,
+    'Clé USB': Usb,
+    'Multiprise': Zap,
+    // Fallbacks
     'Portable': Laptop,
     'Mobile': Smartphone,
     'Ecran': Monitor,
-    'Stockage': HardDrive,
-    'Périphérique': Package,
+    'Matériel': Package,
 };
 
 const ETAT_BADGE: Record<string, React.ReactElement> = {
-    'bon': <Badge variant="success">Bon état</Badge>,
-    'bon état': <Badge variant="success">Bon état</Badge>,
-    'moyen': <Badge variant="warning">État moyen</Badge>,
-    'mauvais': <Badge variant="danger">Mauvais état</Badge>,
-    'neuf': <Badge variant="info">Neuf</Badge>,
+    'BON':           <Badge variant="success">Bon état</Badge>,
+    'USÉ':           <Badge variant="warning">Usé</Badge>,
+    'RECONDITIONNÉ': <Badge variant="info">Reconditionné</Badge>,
+    // Rétrocompatibilité
+    'bon':       <Badge variant="success">Bon état</Badge>,
+    'neuf':      <Badge variant="info">Neuf</Badge>,
 };
 
 export default function Inventory() {
@@ -49,52 +63,69 @@ export default function Inventory() {
     const isLoading = isEquipLoading || isCatsLoading;
 
     const getEtatBadge = (etat: string) => {
-        const lower = (etat ?? '').toLowerCase();
-        return ETAT_BADGE[lower] ?? <Badge variant="default">{etat}</Badge>;
+        if (!etat) return null;
+        const key = etat.toUpperCase();
+        return ETAT_BADGE[key] ?? <Badge variant="default">{etat}</Badge>;
+    };
+
+    const getStatusBadge = (status?: string) => {
+        if (!status) return null;
+        const normalized = status.toUpperCase();
+        switch (normalized) {
+            case 'AVAILABLE':
+            case 'DISPONIBLE': return null; // On masque pour ne pas encombrer l'interface si dispo
+            case 'EMPRUNTÉ':
+            case 'IN_USE':     return <Badge variant="warning" className="bg-orange-100 text-orange-700">Emprunté</Badge>;
+            case 'EN RÉPARATION': 
+            case 'MAINTENANCE': return <Badge variant="danger">En réparation</Badge>;
+            default: return <Badge variant="default">{status}</Badge>;
+        }
     };
 
     return (
-        <div className="space-y-8">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-6">
+            <div className="flex flex-col gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">Inventaire du matériel</h1>
-                    <p className="text-gray-500 mt-2">
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">Inventaire du matériel</h1>
+                    <p className="text-gray-500 mt-2 text-sm sm:text-base">
                         {isAdmin
                             ? 'Gérez l\'ensemble du parc informatique.'
                             : 'Consultez le matériel disponible et faites vos demandes.'}
                     </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-col gap-3">
                     {isAdmin && (
                         <button
                             onClick={() => navigate('/dashboard/inventory/new')}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-xl hover:bg-green-700 transition-colors"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 w-fit self-end bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 transition-colors shadow-sm"
                         >
-                            <PlusCircle size={15} /> Ajouter matériel
+                            <PlusCircle size={16} /> Ajouter matériel
                         </button>
                     )}
-                    <div className="relative group w-full md:w-80">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Rechercher par nom, marque, modèle..."
-                            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all font-medium placeholder:text-gray-400"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </div>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="relative group flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors" size={18} />
+                            <input
+                                type="text"
+                                placeholder="Rechercher par nom, marque, modèle..."
+                                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all font-medium placeholder:text-gray-400"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </div>
 
-                    <select
-                        value={categoryFilter}
-                        onChange={(e) => setCategoryFilter(e.target.value)}
-                        className="bg-white border border-gray-200 rounded-xl px-4 py-2 font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 cursor-pointer"
-                    >
-                        <option value="ALL">Toutes les catégories</option>
-                        {categories.map(cat => (
-                            <option key={cat.id} value={cat.name}>{cat.name}</option>
-                        ))}
-                    </select>
+                        <select
+                            value={categoryFilter}
+                            onChange={(e) => setCategoryFilter(e.target.value)}
+                            className="bg-white border border-gray-200 rounded-xl px-4 py-2 font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 cursor-pointer"
+                        >
+                            <option value="ALL">Toutes les catégories</option>
+                            {categories.map(cat => (
+                                <option key={cat.id} value={cat.name}>{cat.name}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -104,17 +135,17 @@ export default function Inventory() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
                     >
                         {[...Array(6)].map((_, i) => (
-                            <div key={i} className="h-[280px] bg-gray-100 rounded-2xl animate-pulse" />
+                            <div key={i} className="h-[240px] sm:h-[280px] bg-gray-100 rounded-2xl animate-pulse" />
                         ))}
                     </motion.div>
                 ) : filteredEquipments && filteredEquipments.length > 0 ? (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
                     >
                         {filteredEquipments.map((equipment) => {
                             const categoryName = typeof equipment.category === 'object' ? equipment.category.name : equipment.category;
@@ -134,7 +165,10 @@ export default function Inventory() {
                                                 <div className="p-2.5 bg-white border border-gray-100 rounded-xl text-primary-600 group-hover:bg-primary-500 group-hover:text-white transition-colors">
                                                     <Icon size={20} />
                                                 </div>
-                                                {equipment.etat ? getEtatBadge(equipment.etat) : <Badge variant="default">—</Badge>}
+                                                <div className="flex flex-col gap-2 items-end">
+                                                    {equipment.etat ? getEtatBadge(equipment.etat) : null}
+                                                    {getStatusBadge(equipment.status)}
+                                                </div>
                                             </div>
                                             <div className="mt-4">
                                                 <CardTitle className="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors line-clamp-1">{equipment.name}</CardTitle>
@@ -168,13 +202,23 @@ export default function Inventory() {
                                                         </Button>
                                                     </Link>
                                                 </div>
-                                            ) : (
-                                                <Link to={`/espace/reservations/nouvelle`} className="w-full">
-                                                    <Button variant="secondary" className="w-full font-bold group-hover:bg-green-50 group-hover:text-green-700 border-none">
-                                                        Réserver
-                                                    </Button>
-                                                </Link>
-                                            )}
+                                             ) : (
+                                                 (equipment.totalQuantity ?? 0) === 0 ? (
+                                                     <Button 
+                                                         variant="danger" 
+                                                         disabled 
+                                                         className="w-full font-bold cursor-not-allowed opacity-70 pointer-events-auto shadow-none"
+                                                     >
+                                                         Rupture de stock
+                                                     </Button>
+                                                 ) : (
+                                                     <Link to={`/espace/reservations/nouvelle?equipmentId=${equipment.id}`} className="w-full">
+                                                         <Button variant="secondary" className="w-full font-bold group-hover:bg-green-50 group-hover:text-green-700 border-none">
+                                                             Réserver
+                                                         </Button>
+                                                     </Link>
+                                                 )
+                                             )}
                                         </CardFooter>
                                     </Card>
                                 </motion.div>

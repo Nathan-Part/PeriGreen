@@ -14,11 +14,15 @@ const EquipmentDetail     = lazy(() => import("./pages/EquipmentDetail"));
 const Loans               = lazy(() => import("./pages/Loans"));
 const Stats               = lazy(() => import("./pages/Stats"));
 const GestionReservations = lazy(() => import("./pages/admin/GestionReservations"));
+const ManageUsers         = lazy(() => import("./pages/admin/ManageUsers"));
+const NewEquipment        = lazy(() => import("./pages/admin/NewEquipment"));
+const MyProfile           = lazy(() => import("./pages/MyProfile"));
 
 // ─── Pages User ─────────────────────────────────────────────────────────────
 const TableauDeBordUser   = lazy(() => import("./pages/user/TableauDeBordUser"));
 const MesReservations     = lazy(() => import("./pages/user/MesReservations"));
 const NouvelleReservation = lazy(() => import("./pages/user/NouvelleReservation"));
+const DetailReservation   = lazy(() => import("./pages/user/DetailReservation"));
 
 // ─── Pages publiques ────────────────────────────────────────────────────────
 const Home = lazy(() => import("./pages/Home"));
@@ -32,13 +36,11 @@ function LoadingSpinner() {
 }
 
 function App() {
-  const { checkAuth, isLoading } = useAuth();
+  const { checkAuth } = useAuth();
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
-
-  if (isLoading) return <LoadingSpinner />;
 
   return (
     <BrowserRouter>
@@ -58,10 +60,13 @@ function App() {
           >
             <Route index                   element={<Dashboard />} />
             <Route path="inventory"        element={<Inventory />} />
+            <Route path="inventory/new"    element={<NewEquipment />} />
             <Route path="inventory/:id"    element={<EquipmentDetail />} />
             <Route path="loans"            element={<Loans />} />
             <Route path="stats"            element={<Stats />} />
             <Route path="reservations"     element={<GestionReservations />} />
+            <Route path="users"            element={<ManageUsers />} />
+            <Route path="mon-compte"       element={<MyProfile />} />
           </Route>
 
           {/* ── Espace Utilisateur ─────────────────────────────── */}
@@ -73,7 +78,9 @@ function App() {
             <Route path="inventaire"               element={<Inventory />} />
             <Route path="inventaire/:id"           element={<EquipmentDetail />} />
             <Route path="reservations"             element={<MesReservations />} />
+            <Route path="reservations/:id"         element={<DetailReservation />} />
             <Route path="reservations/nouvelle"    element={<NouvelleReservation />} />
+            <Route path="mon-compte"               element={<MyProfile />} />
           </Route>
 
           {/* ── Redirections legacy ────────────────────────────── */}

@@ -93,8 +93,31 @@ export const register = async (userData: {
   });
 };
 
+export interface AuthUser {
+  id: number;
+  email: string;
+  fullName: string;
+  universityId: string;
+  role: string;
+  roles: string[];
+  createdAt?: string;
+}
+
 export const getCurrentUser = async () => {
-  return fetchApi<{ id: number; email: string; roles: string[] }>('/auth/me');
+  return fetchApi<AuthUser>('/auth/me');
+};
+
+export const updateMyProfile = async (data: {
+  email?: string;
+  fullName?: string;
+  universityId?: string;
+  currentPassword?: string;
+  password?: string;
+}) => {
+  return fetchApi<AuthUser>('/api/users/me', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
 };
 
 export const logout = () => {
@@ -112,7 +135,7 @@ export interface Equipment {
   serialNumber: string;
   etat: string;
   status?: string;
-  condition?: string;
+  localisation?: string;
   totalQuantity: number;
   imageUrl: string;
   category: {
@@ -181,6 +204,15 @@ export interface Loan {
   };
 }
 
+export interface LoanSummary {
+  id: number;
+  pickupDate: string;
+  dueDate: string;
+  returnDate: string | null;
+  status: 'EN_COURS' | 'RETOUR_DEMANDE' | 'TERMINE' | 'EN_RETARD';
+  quantity: number;
+}
+
 export const getLoans = async (): Promise<Loan[]> => {
   return fetchApi<Loan[]>('/api/loans');
 };
@@ -238,6 +270,7 @@ export interface Reservation {
     id: number;
     email: string;
   };
+  loan?: LoanSummary | null;
 }
 
 export const getReservations = async (): Promise<Reservation[]> => {
@@ -251,6 +284,9 @@ export const getReservationById = async (id: number): Promise<Reservation> => {
 export const createReservation = async (data: {
   quantity: number;
   equipmentId: number;
+  requesterId?: number;
+  status?: string;
+  dueDate?: string;
 }) => {
   return fetchApi<Reservation>('/api/reservations', {
     method: 'POST',
@@ -276,6 +312,18 @@ export const getMyReservations = async (): Promise<Reservation[]> => {
   return fetchApi<Reservation[]>('/api/reservations/me');
 };
 
+export const cancelReservation = async (id: number): Promise<Reservation> => {
+  return fetchApi<Reservation>(`/api/reservations/${id}/annuler`, {
+    method: 'PATCH',
+  });
+};
+
+export const returnLoan = async (loanId: number): Promise<LoanSummary> => {
+  return fetchApi<LoanSummary>(`/api/loans/${loanId}/retourner`, {
+    method: 'PATCH',
+  });
+};
+
 // User API
 export interface User {
   id: number;
@@ -283,8 +331,30 @@ export interface User {
   fullName: string;
   universityId: string;
   role: string;
+  roles?: string[];
+  createdAt?: string;
 }
 
 export const getUsers = async (): Promise<User[]> => {
   return fetchApi<User[]>('/api/users');
+};
+
+export const createUser = async (data: Omit<User, 'id'> & { password?: string }) => {
+  return fetchApi<User>('/api/users', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
+export const updateUser = async (id: number, data: Partial<User>) => {
+  return fetchApi<User>(`/api/users/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+export const deleteUser = async (id: number) => {
+  return fetchApi<{ message: string }>(`/api/users/${id}`, {
+    method: 'DELETE',
+  });
 };

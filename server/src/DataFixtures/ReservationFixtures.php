@@ -13,7 +13,7 @@ class ReservationFixtures extends Fixture implements DependentFixtureInterface
 {
     public function load(ObjectManager $manager): void
     {
-        $statuses = ['PENDING', 'VALIDATED', 'REJECTED'];
+        $statuses = ['EN_ATTENTE', 'VALIDEE', 'REFUSEE'];
         $admin = $this->getReference('user-admin', User::class);
 
         for ($i = 0; $i < 15; $i++) {
@@ -29,10 +29,10 @@ class ReservationFixtures extends Fixture implements DependentFixtureInterface
             $status = $statuses[array_rand($statuses)];
             $reservation->setStatus($status);
 
-            if ($status !== 'PENDING') {
+            if ($status !== 'EN_ATTENTE') {
                 $reservation->setApprover($admin);
                 $reservation->setValidatedAt(\DateTimeImmutable::createFromMutable((new \DateTime())->modify("-" . rand(0, $i) . " days")));
-                if ($status === 'REJECTED') {
+                if ($status === 'REFUSEE') {
                     $reservation->setDecisionNote("Raison du refus pour la réservation $i.");
                 } else {
                     $reservation->setDecisionNote("Accepté par l'admin.");

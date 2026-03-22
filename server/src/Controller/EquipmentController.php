@@ -17,15 +17,21 @@ class EquipmentController extends AbstractController
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(EquipmentRepository $repo): JsonResponse
     {
-        $equipments = $repo->findAll();
+        // findAllWithJoins() charge catégorie + emprunts en UNE seule requête SQL
+        $equipments = $repo->findAllWithJoins();
         $data = array_map(fn($e) => $this->format($e), $equipments);
 
         return $this->json($data);
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(Equipment $equipment): JsonResponse
+    public function show(int $id, EquipmentRepository $repo): JsonResponse
     {
+        $equipment = $repo->findOneWithJoins($id);
+        if (!$equipment) {
+            return $this->json(['error' => 'Équipement introuvable'], 404);
+        }
+
         return $this->json($this->format($equipment));
     }
 
@@ -107,14 +113,9 @@ class EquipmentController extends AbstractController
 
     private function format(Equipment $e): array
     {
-        $activeLoans = $e->getLoans()->filter(fn($l) => in_array($l->getStatus()?->value, ['EN_COURS', 'EN_RETARD']));
-        $status = $activeLoans->count() > 0 ? 'IN_USE' : 'AVAILABLE';
-        
-        // Si l'état contient "maintenance", on met le status à MAINTENANCE
-        if (str_contains(strtolower($e->getEtat() ?? ''), 'maintenance')) {
-            $status = 'MAINTENANCE';
-        }
-
+        // Le statut est lu directement depuis la colonne `status` en base de données.
+        // Il est mis à jour lors de la création/clôture de prêts dans LoanController.
+        // Plus besoin de boucler sur getLoans() ici (supprime le N+1).
         return [
             'id'            => $e->getId(),
             'name'          => $e->getName(),
@@ -123,8 +124,7 @@ class EquipmentController extends AbstractController
             'model'         => $e->getModel(),
             'serialNumber'  => $e->getSerialNumber(),
             'etat'          => $e->getEtat(),
-            'condition'     => $e->getEtat(), 
-            'status'        => $status,       
+            'status'        => $e->getStatus() ?? 'AVAILABLE',
             'totalQuantity' => $e->getTotalQuantity(),
             'imageUrl'      => $e->getImageUrl(),
             'category'      => [

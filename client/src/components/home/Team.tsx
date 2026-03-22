@@ -43,12 +43,6 @@ const teamMembers = [
         description: 'Code et environnement sont ses deux passions qui se rencontrent ici.',
         meta: ['Parcours', 'Produit', 'Tests'],
     },
-    {
-        name: 'Julie Poudat',
-        role: 'UI Designer',
-        description: 'Elle conçoit des interfaces épurées en pensant à l’empreinte carbone numérique.',
-        meta: ['Design', 'Marque', 'Lisibilité'],
-    },
 ];
 
 const icons = [Leaf, Users, BriefcaseBusiness, Globe];

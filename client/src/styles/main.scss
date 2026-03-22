@@ -32,19 +32,23 @@ body {
   @include mix.card;
 }
 
-// Badges de statuts
+// Badges de statuts (couleurs en dur pour éviter la duplication avec Tailwind)
 .badge-success {
-  @include mix.badge(var.$color-status-success-bg, var.$color-status-success, #bbf7d0);
+  @include mix.badge(#f0fdf4, #16a34a, #bbf7d0);  // green-50, green-600, green-200
 }
+
 .badge-warning {
-  @include mix.badge(var.$color-status-warning-bg, var.$color-status-warning, #fef08a);
+  @include mix.badge(#fefce8, #ca8a04, #fef08a);  // yellow-50, yellow-600, yellow-200
 }
+
 .badge-danger {
-  @include mix.badge(var.$color-status-danger-bg, var.$color-status-danger, #fecaca);
+  @include mix.badge(#fef2f2, #ef4444, #fecaca);  // red-50, red-500, red-200
 }
+
 .badge-info {
-  @include mix.badge(var.$color-status-info-bg, var.$color-status-info, #bfdbfe);
+  @include mix.badge(#eff6ff, #3b82f6, #bfdbfe);  // blue-50, blue-500, blue-200
 }
+
 .badge-default {
   @include mix.badge(var.$color-surface, var.$color-text-muted, var.$color-surface-border);
 }
