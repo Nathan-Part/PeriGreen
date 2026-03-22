@@ -22,7 +22,7 @@ export default function NouvelleReservation() {
 
   useEffect(() => {
     getEquipments()
-      .then((data) => setEquipments(data.filter((e) => e.status === 'AVAILABLE' || !e.status)))
+      .then((data) => setEquipments(data))
       .finally(() => setLoadingEq(false));
   }, []);
 
@@ -99,8 +99,8 @@ export default function NouvelleReservation() {
               >
                 <option value="">-- Choisir un équipement --</option>
                 {equipments.map((eq) => (
-                  <option key={eq.id} value={eq.id}>
-                    {eq.name} {eq.brand ? `· ${eq.brand}` : ''} {eq.model ? `${eq.model}` : ''}
+                  <option key={eq.id} value={eq.id} disabled={(eq.totalQuantity || 0) <= 0}>
+                    {eq.name} {eq.brand ? `· ${eq.brand}` : ''} {eq.model ? `· ${eq.model}` : ''} {(eq.totalQuantity || 0) <= 0 ? '(Rupture de stock)' : ''}
                   </option>
                 ))}
               </select>
