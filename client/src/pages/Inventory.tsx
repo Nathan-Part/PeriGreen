@@ -197,8 +197,13 @@ export default function Inventory() {
                                             {isAdmin ? (
                                                 <div className="flex gap-2 w-full">
                                                     <Link to={`/dashboard/inventory/${equipment.id}`} className="flex-1">
+                                                        <Button variant="ghost" className="w-full font-bold text-xs">
+                                                            Voir la fiche
+                                                        </Button>
+                                                    </Link>
+                                                    <Link to={`/dashboard/inventory/${equipment.id}/edit`} className="flex-1">
                                                         <Button variant="secondary" className="w-full font-bold text-xs border-none">
-                                                            Détails / Modifier
+                                                            Modifier
                                                         </Button>
                                                     </Link>
                                                 </div>
