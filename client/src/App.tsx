@@ -4,6 +4,10 @@ import { AppLayout } from "./components/layout/AppLayout";
 import HomeLayout from "./components/layout/HomeLayout";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import CguPage from "./pages/CguPage";
+import RgpdPage from "./pages/RgpdPage";
 import { useAuth } from "./hooks/useAuth";
 import { ProtectedRoute, AdminRoute, UserRoute } from "./routes/guards";
 
@@ -50,9 +54,13 @@ function App() {
           {/* ── Public ─────────────────────────────────────────── */}
           <Route element={<HomeLayout />}>
             <Route path="/" element={<Home />} />
+            <Route path="/cgu" element={<CguPage />} />
+            <Route path="/rgpd" element={<RgpdPage />} />
           </Route>
           <Route path="/login"    element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* ── Admin ──────────────────────────────────────────── */}
           <Route

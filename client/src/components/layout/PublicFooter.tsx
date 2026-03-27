@@ -32,6 +32,12 @@ export function PublicFooter() {
                                 {item.label}
                             </a>
                         ))}
+                        <Link to="/cgu" className="transition-colors hover:text-[#0f3d2e]">
+                            CGU
+                        </Link>
+                        <Link to="/rgpd" className="transition-colors hover:text-[#0f3d2e]">
+                            RGPD
+                        </Link>
                     </nav>
                     <Link
                         to="/dashboard"
