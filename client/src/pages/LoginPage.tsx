@@ -13,14 +13,13 @@ export default function LoginPage() {
     e.preventDefault();
     try {
       const user = await login(email, password);
-      // Redirection intelligente selon le rôle
       if (user.roles?.includes('ROLE_ADMIN')) {
         navigate('/dashboard');
       } else {
         navigate('/espace');
       }
     } catch {
-      // L'erreur est gérée par useAuth
+      // useAuth exposes the error state.
     }
   };
 
@@ -28,7 +27,6 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-perigreen-50 to-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          {/* Logo */}
           <div className="flex justify-center mb-8">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-perigreen-600 rounded-xl flex items-center justify-center shadow-lg shadow-perigreen-200">
@@ -42,7 +40,7 @@ export default function LoginPage() {
             Connexion
           </h2>
           <p className="text-slate-500 text-center mb-8">
-            Accédez à votre compte pour gérer vos équipements
+            Accedez a votre compte pour gerer vos equipements
           </p>
 
           {error && (
@@ -83,9 +81,14 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-perigreen-500 focus:border-transparent transition-all"
-                  placeholder="••••••••"
+                  placeholder="........"
                   required
                 />
+              </div>
+              <div className="mt-2 text-right">
+                <Link to="/forgot-password" className="text-sm font-medium text-perigreen-600 hover:text-perigreen-700">
+                  Mot de passe oublie ?
+                </Link>
               </div>
             </div>
 
@@ -109,9 +112,11 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-slate-400 text-sm mt-6">
-          <Link to="/" className="hover:text-perigreen-600">
-            ← Retour à l'accueil
-          </Link>
+          <Link to="/" className="hover:text-perigreen-600">Retour a l'accueil</Link>
+          {' | '}
+          <Link to="/cgu" className="hover:text-perigreen-600">CGU</Link>
+          {' | '}
+          <Link to="/rgpd" className="hover:text-perigreen-600">RGPD</Link>
         </p>
       </div>
     </div>

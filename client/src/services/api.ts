@@ -86,10 +86,26 @@ export const register = async (userData: {
   password: string;
   fullName: string;
   universityId: string;
+  cguAccepted: boolean;
+  privacyAccepted: boolean;
 }) => {
   return fetchApi<{ message: string }>('/auth/register', {
     method: 'POST',
     body: JSON.stringify(userData),
+  });
+};
+
+export const requestPasswordReset = async (email: string) => {
+  return fetchApi<{ message: string; resetUrl?: string; expiresAt?: string }>('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+};
+
+export const resetPassword = async (token: string, password: string) => {
+  return fetchApi<{ message: string }>('/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token, password }),
   });
 };
 
@@ -101,6 +117,8 @@ export interface AuthUser {
   role: string;
   roles: string[];
   createdAt?: string;
+  cguAcceptedAt?: string | null;
+  privacyAcceptedAt?: string | null;
 }
 
 export const getCurrentUser = async () => {
